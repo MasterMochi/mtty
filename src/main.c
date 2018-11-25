@@ -1,18 +1,21 @@
 /******************************************************************************/
 /* src/main.c                                                                 */
-/*                                                                 2018/10/05 */
+/*                                                                 2018/10/10 */
 /* Copyright (C) 2018 Mochi.                                                  */
 /******************************************************************************/
 /******************************************************************************/
 /* インクルード                                                               */
 /******************************************************************************/
 /* 共通ヘッダ */
+#include <mterm.h>
+#include "mtty.h"
 #include <stdbool.h>
 #include <stddef.h>
 #include <kernel/library.h>
-#include <mterm.h>
 
 /* モジュールヘッダ */
+#include "Ldisc.h"
+#include "Sess.h"
 
 
 /******************************************************************************/
@@ -20,19 +23,18 @@
 /******************************************************************************/
 void main( void )
 {
-    char   buffer[ MK_MSG_SIZE_MAX + 1 ];
-    size_t size;
+    char         buffer[ MK_MSG_SIZE_MAX + 1 ];
+    size_t       size;
+    MttyMsgHdr_t *pMsg;
     
-    char buffer2[ 50 ];
-    MtermMsgOutput_t *pMsg = (MtermMsgOutput_t*)buffer2;
-    uint32_t index;
-    uint32_t index2;
+    /* 初期化 */
+    pMsg = ( MttyMsgHdr_t * ) buffer;
     
     /* メインループ */
     while ( true ) {
         /* メッセージ受信 */
         size = MkMsgReceive( MK_CONFIG_TASKID_NULL,     /* タスクID           */
-                             buffer,                    /* メッセージバッファ */
+                             pMsg,                      /* メッセージバッファ */
                              MK_MSG_SIZE_MAX,           /* バッファサイズ     */
                              NULL                   );  /* エラー番号         */
         
@@ -43,22 +45,22 @@ void main( void )
             continue;
         }
         
-        for ( index = 0, index2 = 0; index < size; index++ ) {
-            if ( buffer[ index ] == '\n' ) {
-                pMsg->data[ index2 ] = buffer[ index ];
-                index2++;
-            } else if ( 0 <= buffer[ index ] && buffer[ index ] <= 0x1F ) {
-                pMsg->data[ index2     ] = '^';
-                pMsg->data[ index2 + 1 ] = buffer[ index ] + '@';
-                index2 += 2;
-            } else {
-                pMsg->data[ index2 ] = buffer[ index ];
-                index2++;
-            }
+        /* 機能ID判定 */
+        if ( pMsg->funcId == MTTY_FUNC_INPUT ) {
+            /* 端末データ入力 */
+            
+            SessInput( ( MttyMsgInput_t * ) pMsg );
+            
+        } else if ( pMsg->funcId == MTTY_FUNC_READ ) {
+            /* 端末データ読込 */
+            
+            SessDoRead( ( MttyMsgRead_t * ) pMsg );
+            
+        } else if ( pMsg->funcId == MTTY_FUNC_WRITE ) {
+            /* 端末データ書込 */
+            
+            SessDoWrite( ( MttyMsgWrite_t * ) pMsg );
         }
-        pMsg->header.funcId = MTERM_FUNC_OUTPUT;
-        pMsg->header.length = index2;
-        MkMsgSend( 3, pMsg, sizeof ( MtermMsgHdr_t ) + index2, NULL );
     }
 }
 /******************************************************************************/
