@@ -1,0 +1,35 @@
+@startuml
+
+participant drv as "drv-ns16550"
+box "mtty"
+    participant main
+    participant devt    as "デバイスイベント"
+end box
+
+activate main
+
+ref over main: 初期化
+
+main -> devt: DevtInit()
+activate devt
+
+group デバイスファイルオープン
+    drv <<- devt: LibMvfsOpen( "/serial1" )
+    activate drv
+    drv -->> devt:
+    deactivate drv
+    rnote over devt #FFFFFF: シリアルポート1のFD保存
+
+    drv <<- devt: LibMvfsOpen( "/serial2" )
+    activate drv
+    drv -->> devt:
+    deactivate drv
+    rnote over devt #FFFFFF: シリアルポート2のFD保存
+    ||10||
+end
+
+main <-- devt:
+deactivate devt
+||20||
+
+@enduml

@@ -1,0 +1,42 @@
+@startuml
+
+box "mtty"
+    participant "バッファ管理"   as buffer
+    participant "tty制御"        as tty
+    participant "セッション管理" as sess
+    participant "ユーザイベント" as uevt
+end box
+
+activate uevt
+
+ref over uevt: スケジューリング
+
+tty <- uevt: TtyDoVfsWrite( fd, ... )
+activate tty
+
+tty -> sess: SessConvertFdToId( fd )
+activate sess
+ref over sess: デバイスID変換
+tty <-- sess:
+deactivate sess
+
+break 無効デバイスID
+    tty ->> user: LibMvfsSendVfsWriteResp( fd, 失敗, ... )
+    tty --> uevt:
+end break
+
+buffer <- tty: BufferPushForWrite( デバイスID, ... )
+activate buffer
+ref over buffer: バッファ追加
+buffer --> tty:
+deactivate buffer
+
+tty ->> user: LibMvfsSendVfsWriteResp( fd, 成功, ... )
+
+tty --> uevt:
+deactivate tty
+
+||20||
+
+@enduml
+

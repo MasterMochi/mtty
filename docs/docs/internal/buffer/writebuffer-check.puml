@@ -1,0 +1,28 @@
+@startuml
+
+box "mtty"
+    participant "デバイスイベント" as devt
+    participant "バッファ管理"     as buffer
+end box
+
+activate devt
+
+ref over devt: デバイスファイル監視
+
+devt -> buffer: BufferCheckWrite( デバイスID )
+activate buffer
+
+rnote over buffer #FFFFFF: デバイスID->ハンドル変換
+
+buffer -> buffer: MLibRingBufferGetNum( ハンドル )
+
+alt データ数 > 0
+    devt <-- buffer: true
+else
+    devt <-- buffer: false
+    deactivate buffer
+end alt
+||20||
+
+@enduml
+

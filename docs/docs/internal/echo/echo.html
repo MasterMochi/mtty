@@ -1,0 +1,357 @@
+<!doctype html>
+<html lang="ja">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge"><!-- IE互換モード回避 -->
+        <meta name="author" content="Mochi">
+        <meta name="viewport" content="width=device-width,initial-scale=1"><!-- レスポンシブデザイン -->
+        <meta name="description" content="mttyは、MochiKernel上で動作するttyサーバです。">
+        <meta name="format-detection" content="email=no,telephone=no,address=no">
+        <meta property="og:url" content="https://MasterMochi.github.io/mtty/">
+        <meta property="og:title" content="MLib">
+        <meta property="og:type" content="website">
+        <meta property="og:description" content="mttyは、MochiKernel上で動作するttyサーバです。">
+        <!-- <meta property="og:image" content=""> -->
+        <meta name="twitter:card" content="summary_large_image">
+        <meta name="twitter:site" content="@master_mochi">
+        <!-- <meta name="msapplication-TileImage" content="" --><!-- MSWIN8～ピン留め対応 -->
+        <meta name="msapplication-TitleColor" content="#424242"><!-- MSWIN8～ピン留め対応 -->
+        <link rel="stylesheet" href="../../../style.css">
+        <link rel="canonical" href="https://MasterMochi.github.io/mtty/">
+        <!-- <link rel="icon" href="" sizes="16x16" type="image/png"> -->
+        <!-- <link rel="icon" href="" sizes="32x32" type="image/png"> -->
+        <!-- <link rel="icon" href="" sizes="48x48" type="image/png"> -->
+        <!-- <link rel="icon" href="" sizes="62x62" type="image/png"> -->
+        <link href="https://fonts.googleapis.com/css?family=Cutive+Mono" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css?family=Sawarabi+Mincho" rel="stylesheet">
+        <link href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" rel="stylesheet" integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU" crossorigin="anonymous">
+        <title>mtty - 内部仕様 - エコー</title>
+    </head>
+    <body>
+        <a name="top"></a>
+        <div id="header">
+            <div id="menu">
+                <a href="../../../index.html"><div id="logo">MLib</div></a>
+                <a href="../../index.html"><div>Docs</div></a>
+            </div>
+        </div>
+        <div id="crumb">
+            <ol itemscope itemtype="http://schema.org/BreadcrumbList">
+                <li itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem">
+                    <a itemprop="item" href="../../../index.html"><span itemprop="name">Home</span></a>
+                    <meta itemprop="position" content="1">
+                </li>
+                <li itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem">
+                    <a itemprop="item" href="../../index.html"><span itemprop="name">Docs</span></a>
+                    <meta itemprop="position" content="2">
+                </li>
+                <li itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem">
+                    <a itemprop="item" href="./echo.html"><span itemprop="name">内部仕様-エコー</span></a>
+                    <meta itemprop="position" content="3">
+                </li>
+            </ol>
+        </div>
+        <div id="content">
+            <div>
+                <h1>目次</h1>
+                <ul type="disc">
+                    <li><a href="#abstruct">概要</a></li>
+                    <li>機能
+                        <ul type="disc">
+                            <li><a href="#echo">エコー</a>
+                                <ul type="disc">
+                                    <li><a href="#convert">制御文字変換</a></li>
+                                    <li><a href="#write">デバイスファイル書込み</a></li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+                    <li>グローバル関数
+                        <ul type="disc">
+                            <li><a href="#func-echo">EchoDo()</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+            <div>
+                <h1><a name="abstruct">概要</a></h1>
+                <p>デバイスファイルから読み取ったデータをデバイスファイルに書き込む事でエコーする。データが制御コードの場合は文字変換してエコーする。</p>
+            </div>
+            <div>
+                <h1><a name="echo">機能 - エコー</a></h1>
+                <p>エコー機能は、デバイス制御から呼び出されて制御コードの文字変換とデバイスファイル書込みを行う。</p>
+                <p>シーケンスを以下に示す。</p>
+                <br>
+                <div class="center"><img src="echo.png"></div>
+            </div>
+            <div class="totop"><a href="#top">▲上へ</a></div>
+            <div>
+                <h1><a name="convert">機能 - エコー - 制御文字変換</a></h1>
+                <p>データが0x00～0x1Fの場合は下記変換テーブルに従って文字変換を行う。</p>
+                <br>
+                <div class="center">変換テーブル</div>
+                <table>
+                    <tr>
+                        <td class="title">制御コード</td>
+                        <td class="title">変換文字</td>
+                        <td class="title">備考</td>
+                        <td class="title">制御コード</td>
+                        <td class="title">変換文字</td>
+                        <td class="title">備考</td>
+                    </tr>
+                    <tr>
+                        <td>0x00</td>
+                        <td>^@</td>
+                        <td></td>
+                        <td>0x10</td>
+                        <td>^P</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>0x01</td>
+                        <td>^A</td>
+                        <td></td>
+                        <td>0x11</td>
+                        <td>^Q</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>0x02</td>
+                        <td>^B</td>
+                        <td></td>
+                        <td>0x12</td>
+                        <td>^R</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>0x03</td>
+                        <td>^C</td>
+                        <td></td>
+                        <td>0x13</td>
+                        <td>^S</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>0x04</td>
+                        <td>^D</td>
+                        <td></td>
+                        <td>0x14</td>
+                        <td>^T</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>0x05</td>
+                        <td>^E</td>
+                        <td></td>
+                        <td>0x15</td>
+                        <td>^U</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>0x06</td>
+                        <td>^F</td>
+                        <td></td>
+                        <td>0x16</td>
+                        <td>^V</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>0x07</td>
+                        <td>^G</td>
+                        <td></td>
+                        <td>0x17</td>
+                        <td>^W</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>0x08</td>
+                        <td>(0x08)</td>
+                        <td>無変換</td>
+                        <td>0x18</td>
+                        <td>^X</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>0x09</td>
+                        <td>(0x09)</td>
+                        <td>無変換</td>
+                        <td>0x19</td>
+                        <td>^Y</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>0x0A</td>
+                        <td>(0x0A)</td>
+                        <td>無変換</td>
+                        <td>0x1A</td>
+                        <td>^Z</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>0x0B</td>
+                        <td>^K</td>
+                        <td></td>
+                        <td>0x1B</td>
+                        <td>^[</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>0x0C</td>
+                        <td>^L</td>
+                        <td></td>
+                        <td>0x1C</td>
+                        <td>^\</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>0x0D</td>
+                        <td>^M</td>
+                        <td></td>
+                        <td>0x1D</td>
+                        <td>^]</td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>0x0E</td>
+                        <td>^N</td>
+                        <td></td>
+                        <td>0x1E</td>
+                        <td>(0x1E)</td>
+                        <td>無変換</td>
+                    </tr>
+                    <tr>
+                        <td>0x0F</td>
+                        <td>^O</td>
+                        <td></td>
+                        <td>0x1F</td>
+                        <td>^_</td>
+                        <td></td>
+                    </tr>
+                </table>
+            </div>
+            <div class="totop"><a href="#top">▲上へ</a></div>
+            <div>
+                <h1><a name="vfswrite">機能 - エコー - デバイスファイル書込み</a></h1>
+                <p>デバイスファイルへの書込みにはmvfsライブラリのLibMvfsWrite()を用いて行う。</p>
+                <br>
+                <div class="center">デバイス書込</div>
+                <table>
+                    <tr>
+                        <td class="title">関数</td>
+                        <td colspan="3">LibMvfsWrite()</td>
+                    </tr>
+                    <tr>
+                        <td class="title" rowspan="7">引数</td>
+                        <td class="title">#</td>
+                        <td class="title">設定値</td>
+                        <td class="title">説明</td>
+                    </tr>
+                    <tr>
+                        <td class="title">1</td>
+                        <td>(EchoDo()の引数fd)</td>
+                        <td>ファイルディスクリプタ</td>
+                    </tr>
+                    <tr>
+                        <td class="title">2</td>
+                        <td>(変数ポインタ)</td>
+                        <td>書込元データ</td>
+                    </tr>
+                    <tr>
+                        <td class="title" rowspan="2">3</td>
+                        <td>1</td>
+                        <td>無変換時の書込サイズ</td>
+                    </tr>
+                    <tr>
+                        <td>(変換後サイズ)</td>
+                        <td>変換時の書込みサイズ</td>
+                    </tr>
+                    <tr>
+                        <td class="title">4</td>
+                        <td>(変数ポインタ)</td>
+                        <td>書込結果サイズ</td>
+                    </tr>
+                    <tr>
+                        <td class="title">5</td>
+                        <td>(変数ポインタ)</td>
+                        <td>エラー要因</td>
+                    </tr>
+                </table>
+            </div>
+            <div class="totop"><a href="#top">▲上へ</a></div>
+            <div>
+                <h1><a name="func-echo">グローバル関数 - EchoDo()</a></h1>
+                <table>
+                    <tr>
+                        <td class="title">関数</td>
+                        <td colspan="4">EchoDo()</td>
+                    </tr>
+                    <tr>
+                        <td class="title">概要</td>
+                        <td colspan="4">エコー</td>
+                    </tr>
+                    <tr>
+                        <td class="title">説明</td>
+                        <td colspan="4">
+                            データをデバイスファイルに書き込む。<br>
+                            データが制御コードの場合は文字変換を行った後に書き込む。
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="title">宣言</td>
+                        <td colspan="4">
+                            <code>
+                                <pre>#include &lt;Echo.h&gt;</pre>
+                                <br>
+                                <pre>extern void EchoDo( uint32_t    fd,</pre>
+                                <pre>                    MttyDevId_t id,</pre>
+                                <pre>                    char        *pData,</pre>
+                                <pre>                    size_t      size    );</pre>
+                            </code>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="title" rowspan="6">引数</td>
+                        <td class="title">#</td>
+                        <td class="title">引数名</td>
+                        <td class="title">値</td>
+                        <td class="title">説明</td>
+                    </tr>
+                    <tr>
+                        <td class="title">1</td>
+                        <td>fd</td>
+                        <td>(任意の値)</td>
+                        <td>ファイルディスクリプタ</td>
+                    </tr>
+                    <tr>
+                        <td class="title" rowspan="2">2</td>
+                        <td rowspan="2">id</td>
+                        <td>MTTY_DEVID_SERIAL1</td>
+                        <td>/serial1</td>
+                    </tr>
+                    <tr>
+                        <td>MTTY_DEVID_SERIAL2</td>
+                        <td>/serial2</td>
+                    </tr>
+                    <tr>
+                        <td class="title">3</td>
+                        <td>*pData</td>
+                        <td>(任意の値)</td>
+                        <td>データ</td>
+                    </tr>
+                    <tr>
+                        <td class="title">4</td>
+                        <td>size</td>
+                        <td>(任意の値)</td>
+                        <td>データサイズ</td>
+                    </tr>
+                </table>
+            </div>
+            <div class="totop"><a href="#top">▲上へ</a></div>
+        </div>
+        <div id="footer">
+            <div id="copyright">
+                Copyright &copy 2020 Mochi. All rights reserved.
+            </div>
+        </div>
+    </body>
+</html>

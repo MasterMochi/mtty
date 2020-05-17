@@ -1,0 +1,14 @@
+@startuml
+
+participant drv as "drv-ns16550"
+participant mtty
+participant user
+
+activate mtty
+
+mtty -> mtty: LibmvfsMount( "/ttyS1" )
+mtty -> mtty: LibmvfsMount( "/ttyS2" )
+
+deactivate mtty
+
+@enduml

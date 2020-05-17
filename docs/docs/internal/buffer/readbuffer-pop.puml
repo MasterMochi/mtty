@@ -1,0 +1,30 @@
+@startuml
+
+box "mtty"
+    participant "バッファ管理" as buffer
+    participant "tty制御"      as tty
+end box
+
+activate tty
+
+ref over tty: ttyファイル読込み
+
+buffer <- tty: BufferPopForRead( デバイスID, サイズ, ... )
+activate buffer
+
+rnote over buffer #FFFFFF: デバイスID->ハンドル変換
+
+loop サイズ分
+    buffer -> buffer: MLibRingBufferPop( ハンドル, ... )
+
+    break 失敗
+        buffer --> tty:
+    end break
+end loop
+
+buffer --> tty:
+deactivate buffer
+||20||
+
+@enduml
+

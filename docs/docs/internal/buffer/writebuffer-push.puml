@@ -1,0 +1,30 @@
+@startuml
+
+box "mtty"
+    participant "バッファ管理" as buffer
+    participant "tty制御"      as tty
+end box
+
+activate tty
+
+ref over tty: ttyファイル書込み
+
+buffer <- tty: BufferPushForWrite( デバイスID, サイズ, ... )
+activate buffer
+
+rnote over buffer #FFFFFF: デバイスID->ハンドル変換
+
+loop サイズ分
+    buffer -> buffer: MLibRingBufferPush( ハンドル, ... )
+
+    opt 失敗
+        buffer --> tty:
+    end break
+end loop
+
+buffer --> tty:
+deactivate buffer
+||20||
+
+@enduml
+

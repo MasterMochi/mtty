@@ -1,0 +1,36 @@
+@startuml
+
+box "mtty"
+    participant main
+    participant uevt_main as "uevt\n(デバイス制御スレッド)"
+    participant uevt_tty  as "uevt\n(tty制御スレッド)"
+end box
+
+activate main
+
+ref over main: 初期化
+
+main -> uevt_main: UevtInit()
+activate uevt_main
+
+group スレッド作成
+    uevt_main -> uevt_main: malloc()
+
+    create uevt_tty
+    uevt_main -> uevt_tty: LibMkThreadCreate()
+    activate uevt_tty
+end
+
+main <-- uevt_main:
+deactivate uevt_main
+
+
+
+group ttyファイル作成
+    uevt_tty -> uevt_tty: LibMvfsMount( "/ttyS1" )
+    uevt_tty -> uevt_tty: LibMvfsMount( "/ttyS2" )
+end
+
+ref over uevt_tty: スケジューリング
+
+@enduml

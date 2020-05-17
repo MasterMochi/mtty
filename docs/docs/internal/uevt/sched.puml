@@ -1,0 +1,17 @@
+@startuml
+
+box "mtty"
+    participant uevt as "ユーザイベント"
+end box
+
+activate uevt
+
+ref over uevt: 初期化
+
+uevt -> uevt: スケジュール情報設定
+
+uevt -> uevt: LibMvfsSchedStart()
+deactivate uevt
+
+
+@enduml

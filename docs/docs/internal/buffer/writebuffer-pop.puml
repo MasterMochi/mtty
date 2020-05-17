@@ -1,0 +1,31 @@
+@startuml
+
+box "mtty"
+    participant "デバイス制御" as dctrl
+    participant "バッファ管理" as buffer
+end box
+
+activate dctrl
+
+ref over dctrl: デバイスファイル書込み
+
+dctrl -> buffer: BufferPopForWrite( デバイスID, サイズ, ... )
+activate buffer
+
+rnote over buffer #FFFFFF: デバイスID->ハンドル変換
+
+loop サイズ分
+    buffer -> buffer: MLibRingBufferPop( ハンドル, ... )
+
+    break 失敗
+        dctrl <-- buffer:
+    end break
+end loop
+
+dctrl <-- buffer:
+deactivate buffer
+
+||20||
+
+@enduml
+

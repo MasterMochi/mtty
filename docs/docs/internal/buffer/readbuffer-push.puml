@@ -1,0 +1,30 @@
+@startuml
+
+box "mtty"
+    participant "デバイス制御" as dctrl
+    participant "バッファ管理" as buffer
+end box
+
+activate dctrl
+
+ref over dctrl: デバイスファイル読込み
+
+dctrl -> buffer: BufferPushForRead( デバイスID, サイズ, ... )
+activate buffer
+
+rnote over buffer #FFFFFF: デバイスID->ハンドル変換
+
+loop サイズ分
+    buffer -> buffer: MLibRingBufferPush( ハンドル, ... )
+
+    break 失敗
+        dctrl <-- buffer:
+    end break
+end loop
+
+dctrl <-- buffer:
+deactivate buffer
+||20||
+
+@enduml
+

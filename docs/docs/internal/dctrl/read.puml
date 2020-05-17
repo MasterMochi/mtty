@@ -1,0 +1,51 @@
+@startuml
+
+participant drv as "drv_ns16550"
+
+box "mtty"
+    participant "デバイスイベント" as devt
+    participant "デバイス制御"     as dctrl
+    participant "エコー"           as echo
+    participant "バッファ管理"     as buffer
+end box
+
+activate devt
+
+ref over devt: イベント発行
+
+devt -> dctrl: DctrlDoRead( デバイスID, fd )
+activate dctrl
+
+loop
+    drv <<- dctrl: LibMvfsRead( fd, ... )
+    activate drv
+    drv -->> dctrl:
+    deactivate drv
+
+    break 読込サイズ==0
+        devt <-- dctrl:
+    end
+
+    dctrl -> echo: EchoDo( fd, ... )
+    activate echo
+    ref over echo: エコー
+    dctrl <-- echo:
+    deactivate echo
+
+    dctrl -> buffer: BufferPushForRead( デバイスID, ... )
+    activate buffer
+
+    ref over buffer
+        読込み用バッファ管理
+    end ref
+
+    dctrl <-- buffer:
+    deactivate buffer
+end
+
+devt <-- dctrl:
+deactivate dctrl
+||20||
+
+@enduml
+

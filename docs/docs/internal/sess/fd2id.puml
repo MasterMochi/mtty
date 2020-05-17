@@ -1,0 +1,26 @@
+@startuml
+
+box "mtty"
+    participant "セッション管理" as sess
+    participant "ユーザイベント" as uevt
+end box
+
+activate uevt
+
+ref over uevt: スケジューリング
+
+sess <- uevt: SessConvertFdToId()
+activate sess
+
+sess -> sess: MLibListSearchHead()
+note left: セッション情報の取得
+
+alt セッション情報有り
+    sess --> uevt: デバイスID
+else セッション情報無し
+    sess --> uevt: 無効デバイスID
+    deactivate sess
+end alt
+||20||
+
+@enduml
