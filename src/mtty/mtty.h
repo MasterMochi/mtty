@@ -1,7 +1,7 @@
 /******************************************************************************/
 /*                                                                            */
 /* src/mtty/mtty.h                                                            */
-/*                                                                 2020/05/04 */
+/*                                                                 2020/05/18 */
 /* Copyright (C) 2020 Mochi.                                                  */
 /*                                                                            */
 /******************************************************************************/
@@ -20,6 +20,9 @@
 /* デバイスファイルパス */
 #define MTTY_DEVPATH_SERIAL1 ( "/serial1" )     /**< シリアルポート1 */
 #define MTTY_DEVPATH_SERIAL2 ( "/serial2" )     /**< シリアルポート2 */
+/* TTYファイルパス */
+#define MTTY_TTYPATH_SERIAL1 ( "/ttyS1" )       /**< ttyS1 */
+#define MTTY_TTYPATH_SERIAL2 ( "/ttyS2" )       /**< ttyS2 */
 /* デバイスID */
 #define MTTY_DEVID_SERIAL1 ( 0 )                /**< シリアルポート1 */
 #define MTTY_DEVID_SERIAL2 ( 1 )                /**< シリアルポート2 */

@@ -1,7 +1,7 @@
 /******************************************************************************/
 /*                                                                            */
 /* src/mtty/Sess.c                                                            */
-/*                                                                 2020/05/04 */
+/*                                                                 2020/05/18 */
 /* Copyright (C) 2018-2020 Mochi.                                             */
 /*                                                                            */
 /******************************************************************************/
@@ -187,13 +187,13 @@ void SessDoVfsOpen( MkPid_t    pid,
     retLibMvfs = LIBMVFS_RET_FAILURE;
 
     /* パスチェック */
-    if ( strcmp( MTTY_DEVPATH_SERIAL1, pPath ) == 0 ) {
+    if ( strcmp( MTTY_TTYPATH_SERIAL1, pPath ) == 0 ) {
         /* シリアルポート1 */
 
         /* デバイスID設定 */
         id = MTTY_DEVID_SERIAL1;
 
-    } else if ( strcmp( MTTY_DEVPATH_SERIAL2, pPath ) == 0 ) {
+    } else if ( strcmp( MTTY_TTYPATH_SERIAL2, pPath ) == 0 ) {
         /* シリアルポート2 */
 
         /* デバイスID設定 */
@@ -329,7 +329,7 @@ static bool CompareGlobalFd( MLibListNode_t *pNode,
         return false;
     }
 
-    return false;
+    return true;
 }
 
 

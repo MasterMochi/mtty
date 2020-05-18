@@ -1,7 +1,7 @@
 /******************************************************************************/
 /*                                                                            */
 /* src/mtty/Debug.h                                                           */
-/*                                                                 2020/05/01 */
+/*                                                                 2020/05/18 */
 /* Copyright (C) 2019-2020 Mochi.                                             */
 /*                                                                            */
 /******************************************************************************/
@@ -48,11 +48,11 @@
     #define DEBUG_LOG_ERR( _FORMAT, ... )
 #else
     /** デバッグログ出力(エラー) */
-    #define DEBUG_LOG_ERR( _FORMAT, ... )         \
-        LibMlogPut( "[ERR][mtty]:%u] " _FORMAT,   \
-                    __FILE__,                     \
-                    __LINE__,                     \
-                    ##__VA_ARGS__               )
+    #define DEBUG_LOG_ERR( _FORMAT, ... )            \
+        LibMlogPut( "[ERR][mtty][%s:%u] " _FORMAT,   \
+                    __FILE__,                        \
+                    __LINE__,                        \
+                    ##__VA_ARGS__                  )
 #endif
 
 /* デバッグログ出力(トレース) */
