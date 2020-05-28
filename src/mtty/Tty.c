@@ -181,8 +181,7 @@ void TtyDoVfsWrite( uint32_t globalFd,
         /* 書込みサイズと不一致 */
 
         /* VfsWrite応答(成功) */
-        SendVfsWriteResp( globalFd, LIBMVFS_RET_FAILURE, 0, pushSize );
-
+        SendVfsWriteResp( globalFd, LIBMVFS_RET_SUCCESS, 0, pushSize );
     }
 
     return;
