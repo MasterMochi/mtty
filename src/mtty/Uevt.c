@@ -117,7 +117,7 @@ static void SchedThread( void *pArg )
     memset( &schedInfo, 0, sizeof ( LibMvfsSchedInfo_t ) );
 
     /* ttyS1ファイル作成 */
-    retLibMvfs = LibMvfsMount( "/ttyS1", &errLibMvfs );
+    retLibMvfs = LibMvfsMount( MTTY_TTYPATH_SERIAL1, &errLibMvfs );
 
     /* 作成結果判定 */
     if ( retLibMvfs != LIBMVFS_RET_SUCCESS ) {
@@ -131,7 +131,7 @@ static void SchedThread( void *pArg )
     }
 
     /* ttyS2ファイル作成 */
-    retLibMvfs = LibMvfsMount( "/ttyS2", &errLibMvfs );
+    retLibMvfs = LibMvfsMount( MTTY_TTYPATH_SERIAL2, &errLibMvfs );
 
     /* 作成結果判定 */
     if ( retLibMvfs != LIBMVFS_RET_SUCCESS ) {

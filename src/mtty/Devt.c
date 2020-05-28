@@ -58,7 +58,7 @@ void DevtInit( void )
 
     /* シリアルポート1オープン */
     retLibMvfs = LibMvfsOpen( &gDevFd[ MTTY_DEVID_SERIAL1 ],
-                              "/serial1",
+                              MTTY_DEVPATH_SERIAL1,
                               &errLibMvfs                    );
 
     /* オープン結果判定 */
@@ -74,7 +74,7 @@ void DevtInit( void )
 
     /* シリアルポート2オープン */
     retLibMvfs = LibMvfsOpen( &gDevFd[ MTTY_DEVID_SERIAL2 ],
-                              "/serial2",
+                              MTTY_DEVPATH_SERIAL2,
                               &errLibMvfs                    );
 
     /* オープン結果判定 */
