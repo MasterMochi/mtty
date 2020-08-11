@@ -1,0 +1,30 @@
+@startuml
+
+box "mtty"
+    participant "ターミナル制御" as tctrl
+    participant "セッション管理" as sess
+end box
+participant "MLib" as mlib
+
+activate tctrl
+ref over tctrl
+    ターミナルファイルread
+    ターミナルファイルwrite
+end ref
+
+tctrl -> sess: デバイスID変換( fd )
+activate sess
+
+sess -> mlib: セッション情報取得( fd )
+activate mlib
+sess <-- mlib:
+deactivate mlib
+
+alt セッション情報有り
+    tctrl <-- sess: デバイスID
+else セッション情報無し
+    tctrl <-- sess: 無効デバイスID
+    deactivate sess
+end alt
+
+@enduml

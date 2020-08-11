@@ -1,7 +1,7 @@
 #******************************************************************************#
 #*                                                                            *#
 #* src/mtty/Makefile                                                          *#
-#*                                                                 2020/05/01 *#
+#*                                                                 2020/08/11 *#
 #* Copyright (C) 2018-2020 Mochi.                                             *#
 #*                                                                            *#
 #******************************************************************************#
@@ -12,14 +12,14 @@
 PROG = mtty
 
 # ソースコード
-SRCS  = main.c   \
-        Buffer.c \
-        Devt.c   \
-        Uevt.c   \
-        Dctrl.c  \
-        Echo.c   \
-        Sess.c   \
-        Tty.c
+SRCS  = main.c    \
+        Bufmng.c  \
+        Devt.c    \
+        Uevt.c    \
+        Dctrl.c   \
+        Echo.c    \
+        Sessmng.c \
+        Tctrl.c
 
 # ビルドディレクトリ
 BUILD_DIR   = ../../build

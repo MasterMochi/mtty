@@ -1,81 +1,47 @@
 @startuml
 
-participant drv as "drv-ns16550"
+participant "mvfs\nライブラリ" as libmvfs
 box "mtty"
-    participant "メイン"           as main
-    participant "デバイスイベント" as devt
-    participant "デバイス制御"     as dctrl
-    participant "バッファ管理"     as buffer
+    participant "メイン"             as main
+    participant "デバイス\nイベント" as devt
+    participant "デバイス\n制御"     as dctrl
 end box
 
 activate main
-
 ref over main: 制御開始
 
-main -> devt: DevtStart()
+main -> devt: 制御開始
 activate devt
 
 loop
-    group デバイスファイル監視
-        devt -> devt: memset( 読込監視FDリスト, ... )
-        devt -> devt: memset( 書込監視FDリスト, ... )
+    devt -> devt: 読込み監視FDリスト初期化
+    devt -> devt: 読込み監視FDリスト設定( シリアルポート1 )
+    devt -> devt: 読込み監視FDリスト設定( シリアルポート2 )
 
-        devt -> devt: LIBMVFS_FDS_SET(\n    読込監視FDリスト,\n    シリアルポート1\n)
-        devt -> devt: LIBMVFS_FDS_SET(\n     読込監視FDリスト,\n    シリアルポート2\n)
+    libmvfs <- devt: デバイスファイル監視
+    activate libmvfs
+    ...
+    libmvfs --> devt:
+    deactivate libmvfs
 
-        devt -> buffer: BufferCheckWrite( シリアルポート1 )
-        activate buffer
-        ref over buffer: 書込み用バッファ内\nデータ有無判定
-        devt <-- buffer:
-        deactivate buffer
-
-        opt データ有り
-            devt -> devt: LIBMVFS_FDS_SET(\n    書込監視FDリスト,\n    シリアルポート1\n)
-        end opt
-
-        devt -> buffer: BufferCheckWrite( シリアルポート2 )
-        activate buffer
-        ref over buffer: 書込み用バッファ内\nデータ有無判定
-        devt <-- buffer:
-        deactivate buffer
-
-        opt データ無し
-            devt -> devt: LIBMVFS_FDS_SET(\n    書込監視FDリスト,\n    シリアルポート2\n)
-        end opt
-
-        devt -> devt: LibMvfsSelect()
-        deactivate devt
-        ||10||
-    end group
-
-    group イベント発行
-        opt 処理成功(タイムアウトでない)
-            drv ->> devt: VfsReady
-            activate devt
-
-            loop 全監視FD数分
-                alt 読込可能（シリアルポート1 or シリアルポート2）
-                    devt -> dctrl: DctrlDoRead()
-                    activate dctrl
-                    ref over dctrl: デバイスファイル読込み
-                    devt <-- dctrl
-                    deactivate dctrl
-
-                else 書込可能（シリアルポート1 or シリアルポート2）
-                    devt -> dctrl: DctrlDoWrite()
-                    activate dctrl
-                    ref over dctrl: デバイスファイル書込み
-                    devt <-- dctrl
-                    deactivate dctrl
-                end alt
-            end loop
-        end opt
-        ||10||
-    end group
+    loop 全監視FD数分
+        alt シリアルポート1読込可能
+            devt -> dctrl: 読込み(シリアルポート1)
+            activate dctrl
+            ref over dctrl: 読込み
+            devt <-- dctrl:
+            deactivate dctrl
+        else シリアルポート2読込可能
+            devt -> dctrl: 読込み(シリアルポート2)
+            activate dctrl
+            ref over dctrl: 読込み
+            devt <-- dctrl:
+            deactivate dctrl
+        end alt
+    end loop
 end loop
 
 main <-- devt:
 deactivate devt
-||20||
 
 @enduml

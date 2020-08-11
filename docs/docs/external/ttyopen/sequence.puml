@@ -1,0 +1,33 @@
+@startuml
+
+participant mvfs
+participant mtty
+
+activate mvfs
+ref over mvfs, mtty: ターミナルファイル操作要求待ち合わせ機能
+
+mvfs ->> mtty: ターミナルファイルopen要求
+deactivate mvfs
+activate mtty
+
+mtty -> mtty: セッション情報作成
+
+alt セッション情報作成成功
+    mvfs <<- mtty: ターミナルファイルopen応答( 成功 )
+    activate mvfs
+    mvfs ->> mtty:
+    deactivate mvfs
+else セッション情報作成失敗
+    mvfs <<- mtty: ターミナルファイルopen応答( 失敗 )
+    activate mvfs
+    mvfs ->> mtty:
+    deactivate mvfs
+end alt
+
+ref over mvfs, mtty
+    ターミナルファイルread要求処理機能
+    ターミナルファイルwrite要求処理機能
+    ターミナルファイルclose要求処理機能
+end ref
+
+@enduml

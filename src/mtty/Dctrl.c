@@ -1,7 +1,7 @@
 /******************************************************************************/
 /*                                                                            */
 /* src/mtty/Dctrl.c                                                           */
-/*                                                                 2020/05/06 */
+/*                                                                 2020/08/11 */
 /* Copyright (C) 2020 Mochi.                                                  */
 /*                                                                            */
 /******************************************************************************/
@@ -17,20 +17,13 @@
 #include <libmvfs.h>
 
 /* 共通ヘッダ */
-#include "Buffer.h"
+#include "config.h"
+#include "Bufmng.h"
 #include "Dctrl.h"
+#include "Devt.h"
 #include "Debug.h"
 #include "Echo.h"
-
-
-/******************************************************************************/
-/* 定義                                                                       */
-/******************************************************************************/
-/** 読込みサイズ */
-#define READ_SIZE ( 512 )
-
-/** 書込みサイズ */
-#define WRITE_SIZE ( 512 )
+#include "Tctrl.h"
 
 
 /******************************************************************************/
@@ -39,7 +32,8 @@
 /******************************************************************************/
 /**
  * @brief       デバイスファイル読込み
- * @details     デバイスからデータを読込み、バッファにデータを追加する。
+ * @details     デバイスからデータを読込み、バッファにデータを追加する。また、
+ *              読込みレディとエコーを行う。
  *
  * @param[in]   fd ファイルディスクリプタ
  * @param[in]   id デバイスID
@@ -47,23 +41,28 @@
  *                  - MTTY_DEVID_SERIAL2 シリアルポート2
  */
 /******************************************************************************/
-void DctrlDoRead( uint32_t    fd,
-                  MttyDevId_t id  )
+void DctrlRead( uint32_t    fd,
+                MttyDevID_t id  )
 {
-    char         buffer[ READ_SIZE ];   /* バッファ              */
-    size_t       size;                  /* サイズ                */
-    LibMvfsErr_t errLibMvfs;            /* LibMvfs関数エラー要因 */
-    LibMvfsRet_t retLibMvfs;            /* LibMvfs関数戻り値     */
+    char         buffer[ CONFIG_SIZE_READ ];    /* バッファ              */
+    size_t       size;                          /* サイズ                */
+    LibMvfsErr_t errLibMvfs;                    /* LibMvfs関数エラー要因 */
+    LibMvfsRet_t retLibMvfs;                    /* LibMvfs関数戻り値     */
 
     /* 初期化 */
-    memset( buffer, 0, READ_SIZE );
+    memset( buffer, 0, CONFIG_SIZE_READ );
     size       = 0;
     errLibMvfs = LIBMVFS_ERR_NONE;
     retLibMvfs = LIBMVFS_RET_FAILURE;
 
     while ( true ) {
         /* デバイスファイル読込 */
-        retLibMvfs = LibMvfsRead( fd, buffer, READ_SIZE, &size, &errLibMvfs );
+        retLibMvfs =
+            LibMvfsRead( fd,                    /* ファイルディスクリプタ */
+                         buffer,                /* 読込みバッファ         */
+                         CONFIG_SIZE_READ,      /* 読込みバッファサイズ   */
+                         &size,                 /* 読込みサイズ           */
+                         &errLibMvfs       );   /* エラー要因             */
 
         /* 読込みサイズ判定 */
         if ( size == 0 ) {
@@ -72,11 +71,14 @@ void DctrlDoRead( uint32_t    fd,
             break;
         }
 
+        /* バッファ追加 */
+        BufmngPushForRead( id, &buffer, size );
+
+        /* 読込みレディ */
+        TctrlReadyRead( id );
+
         /* エコー */
         EchoDo( fd, id, buffer, size );
-
-        /* バッファ追加 */
-        BufferPushForRead( id, &buffer, size );
     }
 
     return;
@@ -88,49 +90,50 @@ void DctrlDoRead( uint32_t    fd,
  * @brief       デバイスファイル書込み
  * @details     バッファからデータを取り出し、デバイスにデータを書き込む。
  *
- * @param[in]   fd ファイルディスクリプタ
- * @param[in]   id デバイスID
+ * @param[in]   id     デバイスID
  *                  - MTTY_DEVID_SERIAL1 シリアルポート1
  *                  - MTTY_DEVID_SERIAL2 シリアルポート2
+ * @param[in]   *pData データ
+ * @param[in]   size   サイズ
  */
 /******************************************************************************/
-void DctrlDoWrite( uint32_t    fd,
-                   MttyDevId_t id  )
+size_t DctrlWrite( MttyDevID_t id,
+                   void        *pData,
+                   size_t      size    )
 {
-    char         buffer[ WRITE_SIZE ];  /* 書込みバッファ        */
-    size_t       writeSize;             /* 書込みサイズ          */
-    size_t       retSize;               /* 書込み結果サイズ      */
-    LibMvfsErr_t errLibMvfs;            /* LibMvfs関数エラー要因 */
-    LibMvfsRet_t retLibMvfs;            /* LibMvfs関数戻り値     */
+    size_t       retSize;               /* 書込み結果サイズ       */
+    uint32_t     fd;                    /* ファイルディスクリプタ */
+    LibMvfsErr_t errLibMvfs;            /* LibMvfs関数エラー要因  */
+    LibMvfsRet_t retLibMvfs;            /* LibMvfs関数戻り値      */
 
     /* 初期化 */
-    memset( buffer, 0, WRITE_SIZE );
-    writeSize = 0;
-    retSize   = 0;
+    retSize    = 0;
+    fd         = 0;
     errLibMvfs = LIBMVFS_ERR_NONE;
     retLibMvfs = LIBMVFS_RET_FAILURE;
 
-    /* バッファ取出し */
-    writeSize = BufferPopForWrite( id, buffer, WRITE_SIZE );
+    /* デバイスファイルFD変換 */
+    fd = DevtConvertToFD( id );
 
-    /* 取出し結果判定 */
-    if ( writeSize != 0 ) {
-        /* 取出し成功 */
+    /* 書込みサイズ判定 */
+    if ( size != 0 ) {
 
-        retLibMvfs = LibMvfsWrite( fd,
-                                   buffer,
-                                   writeSize,
-                                   &retSize,
-                                   &errLibMvfs );
+        /* 書込み */
+        retLibMvfs =
+            LibMvfsWrite( fd,               /* ファイルディスクリプタ */
+                          pData,            /* 書込みデータ           */
+                          size,             /* 書込みデータサイズ     */
+                          &retSize,         /* 書込みサイズ           */
+                          &errLibMvfs );    /* エラー要因             */
 
         /* 書込み結果 */
         if ( ( retLibMvfs != LIBMVFS_RET_SUCCESS ) ||
-             ( writeSize  != retSize             )    ) {
+             ( retSize    != size                )    ) {
             /* 失敗 */
 
             DEBUG_LOG_ERR(
                 "LibMvfsWrite(): wsize=%u, ret=%u, err=%x, rsize=%u",
-                writeSize,
+                size,
                 retLibMvfs,
                 errLibMvfs,
                 retSize
@@ -138,7 +141,7 @@ void DctrlDoWrite( uint32_t    fd,
         }
     }
 
-    return;
+    return retSize;
 }
 
 

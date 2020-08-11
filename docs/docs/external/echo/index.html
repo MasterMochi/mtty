@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="ja">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge"><!-- IE互換モード回避 -->
+        <meta name="author" content="Mochi">
+        <meta name="viewport" content="width=device-width,initial-scale=1"><!-- レスポンシブデザイン -->
+        <meta name="description" content="mttyは、MochiKernel上で動作するttyサーバです。">
+        <meta name="format-detection" content="email=no,telephone=no,address=no">
+        <meta property="og:url" content="https://MasterMochi.github.io/mtty/">
+        <meta property="og:title" content="MLib">
+        <meta property="og:type" content="website">
+        <meta property="og:description" content="mttyは、MochiKernel上で動作するttyサーバです。">
+        <!-- <meta property="og:image" content=""> -->
+        <meta name="twitter:card" content="summary_large_image">
+        <meta name="twitter:site" content="@master_mochi">
+        <!-- <meta name="msapplication-TileImage" content="" --><!-- MSWIN8～ピン留め対応 -->
+        <meta name="msapplication-TitleColor" content="#424242"><!-- MSWIN8～ピン留め対応 -->
+        <link rel="stylesheet" href="../../../style.css">
+        <link rel="canonical" href="https://MasterMochi.github.io/mtty/">
+        <link href="https://fonts.googleapis.com/css?family=Cutive+Mono" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css?family=Sawarabi+Mincho" rel="stylesheet">
+        <link href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" rel="stylesheet" integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU" crossorigin="anonymous">
+        <title>mtty - 外部仕様 - エコー機能</title>
+    </head>
+    <body>
+        <a name="top"></a>
+        <div id="header">
+            <div id="menu">
+                <a href="../../../index.html"><div id="logo">mtty</div></a>
+                <a href="../../index.html"><div>Docs</div></a>
+            </div>
+        </div>
+        <div id="crumb">
+            <ol itemscope itemtype="http://schema.org/BreadcrumbList">
+                <li itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem">
+                    <a itemprop="item" href="../../../index.html"><span itemprop="name">Home</span></a>
+                    <meta itemprop="position" content="1">
+                </li>
+                <li itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem">
+                    <a itemprop="item" href="../../index.html"><span itemprop="name">Docs</span></a>
+                    <meta itemprop="position" content="2">
+                </li>
+                <li itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem">
+                    <a itemprop="item" href="../../index.html#external"><span itemprop="name">外部仕様</span></a>
+                    <meta itemprop="position" content="3">
+                </li>
+                <li itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem">
+                    <a itemprop="item" href="./index.html"><span itemprop="name">エコー機能</span></a>
+                    <meta itemprop="position" content="4">
+                </li>
+            </ol>
+        </div>
+        <div id="content">
+            <div>
+                <h1>エコー機能</h1>
+                <p>デバイスファイルread機能により読み込んだデータを1byte毎にデバイスファイルに書き戻す。データが制御コードの場合は表示可能な文字列に変換してデバイスファイルに書き込む。シーケンスを以下に示す。</p>
+                <br>
+                <div class="center">
+                    シーケンス<br>
+                    <img src="sequence.png">
+                </div>
+            </div>
+            <div class="totop"><a href="#top">▲上へ</a></div>
+            <div>
+                <h1>制御コード文字変換</h1>
+                <p>デバイスファイルから読み込んだデータが制御コードの場合は下表に従って文字列に変換する。</p>
+                <br>
+                <div class="center">変換表</div>
+                <table>
+                    <tr>
+                        <td class="title">制御コード</td><td class="title">変換文字列</td><td class="title">備考</td>
+                        <td class="title">制御コード</td><td class="title">変換文字列</td><td class="title">備考</td>
+                    </tr>
+                    <tr><td class="title">0x00</td><td class="center">^@          </td><td>NUL, CTRL+@</td><td class="title">0x10</td><td class="center">^P          </td><td>DLE, CTRL+P</td></tr>
+                    <tr><td class="title">0x01</td><td class="center">^A          </td><td>SOH, CTRL+A</td><td class="title">0x11</td><td class="center">^Q          </td><td>DC1, CTRL+Q</td></tr>
+                    <tr><td class="title">0x02</td><td class="center">^B          </td><td>STX, CTRL+B</td><td class="title">0x12</td><td class="center">^R          </td><td>DC2, CTRL+R</td></tr>
+                    <tr><td class="title">0x03</td><td class="center">^C          </td><td>ETX, CTRL+C</td><td class="title">0x13</td><td class="center">^S          </td><td>DC3, CTRL+S</td></tr>
+                    <tr><td class="title">0x04</td><td class="center">^D          </td><td>EOT, CTRL+D</td><td class="title">0x14</td><td class="center">^T          </td><td>DC4, CTRL+T</td></tr>
+                    <tr><td class="title">0x05</td><td class="center">^E          </td><td>ENQ, CTRL+E</td><td class="title">0x15</td><td class="center">^U          </td><td>NAK, CTRL+U</td></tr>
+                    <tr><td class="title">0x06</td><td class="center">^F          </td><td>ACK, CTRL+F</td><td class="title">0x16</td><td class="center">^V          </td><td>SYN, CTRL+V</td></tr>
+                    <tr><td class="title">0x07</td><td class="center">^G          </td><td>BEL, CTRL+G</td><td class="title">0x17</td><td class="center">^W          </td><td>ETB, CTRL+W</td></tr>
+                    <tr><td class="title">0x08</td><td class="center">(変換しない)</td><td>BS,  CTRL+H</td><td class="title">0x18</td><td class="center">^X          </td><td>CAN, CTRL+X</td></tr>
+                    <tr><td class="title">0x09</td><td class="center">(変換しない)</td><td>HT,  CTRL+I</td><td class="title">0x19</td><td class="center">^Y          </td><td>EM,  CTRL+Y</td></tr>
+                    <tr><td class="title">0x0A</td><td class="center">(変換しない)</td><td>LF,  CTRL+J</td><td class="title">0x1A</td><td class="center">^Z          </td><td>SUB, CTRL+Z</td></tr>
+                    <tr><td class="title">0x0B</td><td class="center">^K          </td><td>VT,  CTRL+K</td><td class="title">0x1B</td><td class="center">^[          </td><td>ESC, CTRL+[</td></tr>
+                    <tr><td class="title">0x0C</td><td class="center">^L          </td><td>FF,  CTRL+L</td><td class="title">0x1C</td><td class="center">^\          </td><td>FS,  CTRL+\</td></tr>
+                    <tr><td class="title">0x0D</td><td class="center">^M          </td><td>CR,  CTRL+M</td><td class="title">0x1D</td><td class="center">^]          </td><td>GS,  CTRL+]</td></tr>
+                    <tr><td class="title">0x0E</td><td class="center">^N          </td><td>SO,  CTRL+N</td><td class="title">0x1E</td><td class="center">(変換しない)</td><td>RS,  CTRL+^</td></tr>
+                    <tr><td class="title">0x0F</td><td class="center">^O          </td><td>SI,  CTRL+O</td><td class="title">0x1F</td><td class="center">^_          </td><td>US,  CTRL+/</td></tr>
+                </table>
+            </div>
+            <div class="totop"><a href="#top">▲上へ</a></div>
+        </div>
+        <div id="footer">
+            <div id="copyright">
+                Copyright &copy 2020 Mochi. All rights reserved.
+            </div>
+        </div>
+    </body>
+</html>

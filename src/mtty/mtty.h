@@ -1,7 +1,7 @@
 /******************************************************************************/
 /*                                                                            */
 /* src/mtty/mtty.h                                                            */
-/*                                                                 2020/05/18 */
+/*                                                                 2020/08/11 */
 /* Copyright (C) 2020 Mochi.                                                  */
 /*                                                                            */
 /******************************************************************************/
@@ -18,11 +18,13 @@
 /* 定義                                                                       */
 /******************************************************************************/
 /* デバイスファイルパス */
-#define MTTY_DEVPATH_SERIAL1 ( "/serial1" )     /**< シリアルポート1 */
-#define MTTY_DEVPATH_SERIAL2 ( "/serial2" )     /**< シリアルポート2 */
-/* TTYファイルパス */
-#define MTTY_TTYPATH_SERIAL1 ( "/ttyS1" )       /**< ttyS1 */
-#define MTTY_TTYPATH_SERIAL2 ( "/ttyS2" )       /**< ttyS2 */
+#define MTTY_DEVPATH_SERIAL1 "/serial1"     /**< シリアルポート1 */
+#define MTTY_DEVPATH_SERIAL2 "/serial2"     /**< シリアルポート2 */
+
+/* ターミナルファイルパス */
+#define MTTY_TTYPATH_SERIAL1 "/ttyS1"       /**< ttyS1 */
+#define MTTY_TTYPATH_SERIAL2 "/ttyS2"       /**< ttyS2 */
+
 /* デバイスID */
 #define MTTY_DEVID_SERIAL1 ( 0 )                /**< シリアルポート1 */
 #define MTTY_DEVID_SERIAL2 ( 1 )                /**< シリアルポート2 */
@@ -30,7 +32,7 @@
 #define MTTY_DEVID_NULL    ( MTTY_DEVID_NUM )   /**< 無効デバイスID  */
 
 /** デバイスID型 */
-typedef uint32_t MttyDevId_t;
+typedef uint32_t MttyDevID_t;
 
 
 /******************************************************************************/

@@ -1,0 +1,49 @@
+@startuml
+
+participant "mvfs\nライブラリ" as libmvfs
+box "mtty"
+    participant "セッション管理"   as sess
+    participant "ユーザ\nイベント" as uevt
+end box
+participant "MLib" as mlib
+
+activate libmvfs
+ref over libmvfs, uevt
+    ターミナルファイル操作要求待ち合わせ
+end ref
+
+libmvfs -> sess: ターミナルファイルopen要求( path )
+activate sess
+
+break path != "/ttyS1" &&\n path != "/ttyS2"
+    libmvfs <- sess: ターミナルファイルopen応答( 失敗 )
+    activate libmvfs
+    libmvfs --> sess:
+    deactivate libmvfs
+    libmvfs <-- sess:
+end break
+
+sess -> sess: セッション情報割当て
+
+break 割当て失敗
+    libmvfs <- sess: ターミナルファイルopen応答( 失敗 )
+    activate libmvfs
+    libmvfs --> sess:
+    deactivate libmvfs
+    libmvfs <-- sess:
+end break
+
+rnote over sess #FFFFFF: セッション情報設定
+
+sess -> mlib: セッション情報登録
+
+libmvfs <- sess: ターミナルファイルopen応答( 成功 )
+activate libmvfs
+libmvfs --> sess:
+deactivate libmvfs
+
+libmvfs <-- sess:
+deactivate sess
+
+@enduml
+

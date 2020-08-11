@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="ja">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge"><!-- IE互換モード回避 -->
+        <meta name="author" content="Mochi">
+        <meta name="viewport" content="width=device-width,initial-scale=1"><!-- レスポンシブデザイン -->
+        <meta name="description" content="mttyは、MochiKernel上で動作するttyサーバです。">
+        <meta name="format-detection" content="email=no,telephone=no,address=no">
+        <meta property="og:url" content="https://MasterMochi.github.io/mtty/">
+        <meta property="og:title" content="MLib">
+        <meta property="og:type" content="website">
+        <meta property="og:description" content="mttyは、MochiKernel上で動作するttyサーバです。">
+        <!-- <meta property="og:image" content=""> -->
+        <meta name="twitter:card" content="summary_large_image">
+        <meta name="twitter:site" content="@master_mochi">
+        <!-- <meta name="msapplication-TileImage" content="" --><!-- MSWIN8～ピン留め対応 -->
+        <meta name="msapplication-TitleColor" content="#424242"><!-- MSWIN8～ピン留め対応 -->
+        <link rel="stylesheet" href="../../../style.css">
+        <link rel="canonical" href="https://MasterMochi.github.io/mtty/">
+        <link href="https://fonts.googleapis.com/css?family=Cutive+Mono" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css?family=Sawarabi+Mincho" rel="stylesheet">
+        <link href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" rel="stylesheet" integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU" crossorigin="anonymous">
+        <title>mtty - 内部仕様 - エコー</title>
+    </head>
+    <body>
+        <a name="top"></a>
+        <div id="header">
+            <div id="menu">
+                <a href="../../../index.html"><div id="logo">mtty</div></a>
+                <a href="../../index.html"><div>Docs</div></a>
+            </div>
+        </div>
+        <div id="crumb">
+            <ol itemscope itemtype="http://schema.org/BreadcrumbList">
+                <li itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem">
+                    <a itemprop="item" href="../../../index.html"><span itemprop="name">Home</span></a>
+                    <meta itemprop="position" content="1">
+                </li>
+                <li itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem">
+                    <a itemprop="item" href="../../index.html"><span itemprop="name">Docs</span></a>
+                    <meta itemprop="position" content="2">
+                </li>
+                <li itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem">
+                    <a itemprop="item" href="../../index.html#internal"><span itemprop="name">内部仕様</span></a>
+                    <meta itemprop="position" content="3">
+                </li>
+                <li itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem">
+                    <a itemprop="item" href="./index.html"><span itemprop="name">エコー</span></a>
+                    <meta itemprop="position" content="4">
+                </li>
+            </ol>
+        </div>
+        <div id="content">
+            <div>
+                <h1>エコーモジュール</h1>
+                <ol>
+                    <li><a href="#echo">エコー</a><ol>
+                        <li><a href="#convert">制御文字変換</a></li>
+                        <li><a href="#write">書込み</a></li></ol></li>
+                </ol>
+            </div>
+            <div>
+                <h1><a name="echo">エコー</a></h1>
+                <p>デバイスファイルからデータ読込み時にデバイス制御から起動され、制御コードの文字変換とデバイスファイル書込みを行う。シーケンスを以下に示す。</p>
+                <br>
+                <div class="center">
+                    シーケンス<br>
+                    <img src="echo.png">
+                </div>
+                <br>
+                <h2><a name="convert">制御文字変換</a></h2>
+                <p>データが0x00～0x1Fの場合は変換テーブルに従って文字変換を行う。詳細は、<a href="../../external/echo/index.html">外部仕様(エコー機能)</a>の制御コード文字変換を参照のこと。</p>
+                <br>
+                <br>
+                <h2><a name="write">書込み</a></h2>
+                <p>デバイスファイルへの書込みはデバイス制御モジュールのデバイスファイルwrite機能を用いる。</p>
+                <br>
+                <br>
+            </div>
+            <div class="totop"><a href="#top">▲上へ</a></div>
+        </div>
+        <div id="footer">
+            <div id="copyright">
+                Copyright &copy 2020 Mochi. All rights reserved.
+            </div>
+        </div>
+    </body>
+</html>

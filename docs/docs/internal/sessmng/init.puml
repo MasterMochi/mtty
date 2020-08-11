@@ -1,0 +1,23 @@
+@startuml
+
+box "mtty"
+    participant "メイン"           as main
+    participant "セッション\n管理" as sessmng
+end box
+participant "MLib" as mlib
+
+activate main
+ref over main: 初期化
+
+main -> sessmng: 初期化
+activate sessmng
+
+sessmng -> mlib: セッション管理初期化
+activate mlib
+sessmng <-- mlib:
+deactivate mlib
+
+main <-- sessmng:
+deactivate sessmng
+
+@enduml

@@ -18,10 +18,6 @@
         <meta name="msapplication-TitleColor" content="#424242"><!-- MSWIN8～ピン留め対応 -->
         <link rel="stylesheet" href="../style.css">
         <link rel="canonical" href="https://MasterMochi.github.io/mtty/">
-        <!-- <link rel="icon" href="" sizes="16x16" type="image/png"> -->
-        <!-- <link rel="icon" href="" sizes="32x32" type="image/png"> -->
-        <!-- <link rel="icon" href="" sizes="48x48" type="image/png"> -->
-        <!-- <link rel="icon" href="" sizes="62x62" type="image/png"> -->
         <link href="https://fonts.googleapis.com/css?family=Cutive+Mono" rel="stylesheet">
         <link href="https://fonts.googleapis.com/css?family=Sawarabi+Mincho" rel="stylesheet">
         <link href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" rel="stylesheet" integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU" crossorigin="anonymous">
@@ -48,38 +44,43 @@
         </div>
         <div id="content">
             <div>
-                <h1>外部仕様</h1>
-                <ul type="disc">
-                    <li><a href="external/abstruct.html">概要</a></li>
+                <h1><a name="external">外部仕様</a></h1>
+                <ol type="disc">
+                    <li><a href="external/abstruct/index.html">概要</a></li>
                     <li>機能
-                    <ul type="disc">
-                        <li><a href="external/devopen.html">デバイスファイルオープン機能</a></li>
-                        <li><a href="external/devread.html">デバイスファイル読込機能</a></li>
-                        <li><a href="external/devwrite.html">デバイスファイル書込機能</a></li>
-                        <li><a href="external/echo.html">エコー機能</a></li>
-                        <li><a href="external/ttymake.html">ttyファイル作成機能</a></li>
-                        <li><a href="external/ttyread.html">ttyファイル読込要求処理機能</a></li>
-                        <li><a href="external/ttywrite.html">ttyファイル書込要求処理機能</a></li>
-                    </ul></li>
-                </ul>
+                    <ol type="disc">
+                        <li>デバイス制御機能<ol>
+                            <li><a href="external/devopen/index.html">デバイスファイルopen機能</a></li>
+                            <li><a href="external/devread/index.html">デバイスファイルread機能</a></li>
+                            <li><a href="external/devwrite/index.html">デバイスファイルwrite機能</a></li></ol>
+                        <li><a href="external/echo/index.html">エコー機能</a></li>
+                        <li>ターミナルファイル管理機能<ol>
+                            <li><a href="external/ttymount/index.html">ターミナルファイル作成機能</a></li>
+                            <li><a href="external/ttywait/index.html">ターミナルファイル操作要求待ち合わせ機能</a></li>
+                            <li><a href="external/ttyopen/index.html">ターミナルファイルopen要求処理機能</a></li>
+                            <li><a href="external/ttyread/index.html">ターミナルファイルread要求処理機能</a></li>
+                            <li><a href="external/ttywrite/index.html">ターミナルファイルwrite要求処理機能</a></li>
+                            <li><a href="external/ttyclose/index.html">ターミナルファイルclose要求処理機能</a></li></ol></li>
+                    </ol></li>
+                </ol>
             </div>
             <div>
-                <h1>内部仕様</h1>
-                <ul type="disc">
-                    <li><a href="internal/module/module.html">モジュール構成</a></li>
+                <h1><a name="internal">内部仕様</a></h1>
+                <ol type="disc">
+                    <li><a href="internal/module/index.html">モジュール構成</a></li>
                     <li>モジュール
-                        <ul type="disc">
-                            <li><a href="internal/main/main.html">メイン</a></li>
-                            <li><a href="internal/devt/devt.html">デバイスイベント</a></li>
-                            <li><a href="internal/dctrl/dctrl.html">デバイス制御</a></li>
-                            <li><a href="internal/echo/echo.html">エコー</a></li>
-                            <li><a href="internal/buffer/buffer.html">バッファ管理</a></li>
-                            <li><a href="internal/uevt/uevt.html">ユーザイベント</a></li>
-                            <li><a href="internal/sess/sess.html">セッション管理</a></li>
-                            <li><a href="internal/tty/tty.html">tty制御</a></li>
-                        </ul>
+                        <ol type="disc">
+                            <li><a href="internal/main/index.html">メイン</a></li>
+                            <li><a href="internal/devt/index.html">デバイスイベント</a></li>
+                            <li><a href="internal/dctrl/index.html">デバイス制御</a></li>
+                            <li><a href="internal/echo/index.html">エコー</a></li>
+                            <li><a href="internal/bufmng/index.html">バッファ管理</a></li>
+                            <li><a href="internal/uevt/index.html">ユーザイベント</a></li>
+                            <li><a href="internal/sessmng/index.html">セッション管理</a></li>
+                            <li><a href="internal/tctrl/index.html">ターミナル制御</a></li>
+                        </ol>
                     </li>
-                </ul>
+                </ol>
             </div>
         </div>
         <div id="footer">

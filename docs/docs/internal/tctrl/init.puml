@@ -1,0 +1,29 @@
+@startuml
+
+box "mtty"
+    participant "メイン"           as main
+    participant "ターミナル\n制御" as tctrl
+end box
+participant "MLib" as mlib
+
+activate main
+ref over main: 初期化
+
+main -> tctrl: 初期化
+activate tctrl
+
+tctrl -> mlib: /ttyS1用スピンロック初期化
+activate mlib
+tctrl <-- mlib:
+deactivate mlib
+
+tctrl -> mlib: /ttyS2用スピンロック初期化
+activate mlib
+tctrl <-- mlib:
+deactivate mlib
+
+tctrl -> tctrl: 読込みレディ通知状態初期化
+main <-- tctrl:
+deactivate tctrl
+
+@enduml

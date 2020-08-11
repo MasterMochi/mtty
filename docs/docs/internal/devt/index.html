@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="ja">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge"><!-- IE互換モード回避 -->
+        <meta name="author" content="Mochi">
+        <meta name="viewport" content="width=device-width,initial-scale=1"><!-- レスポンシブデザイン -->
+        <meta name="description" content="mttyは、MochiKernel上で動作するttyサーバです。">
+        <meta name="format-detection" content="email=no,telephone=no,address=no">
+        <meta property="og:url" content="https://MasterMochi.github.io/mtty/">
+        <meta property="og:title" content="MLib">
+        <meta property="og:type" content="website">
+        <meta property="og:description" content="mttyは、MochiKernel上で動作するttyサーバです。">
+        <!-- <meta property="og:image" content=""> -->
+        <meta name="twitter:card" content="summary_large_image">
+        <meta name="twitter:site" content="@master_mochi">
+        <!-- <meta name="msapplication-TileImage" content="" --><!-- MSWIN8～ピン留め対応 -->
+        <meta name="msapplication-TitleColor" content="#424242"><!-- MSWIN8～ピン留め対応 -->
+        <link rel="stylesheet" href="../../../style.css">
+        <link rel="canonical" href="https://MasterMochi.github.io/mtty/">
+        <link href="https://fonts.googleapis.com/css?family=Cutive+Mono" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css?family=Sawarabi+Mincho" rel="stylesheet">
+        <link href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" rel="stylesheet" integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU" crossorigin="anonymous">
+        <title>mtty - 内部仕様 - デバイスイベント</title>
+    </head>
+    <body>
+        <a name="top"></a>
+        <div id="header">
+            <div id="menu">
+                <a href="../../../index.html"><div id="logo">mtty</div></a>
+                <a href="../../index.html"><div>Docs</div></a>
+            </div>
+        </div>
+        <div id="crumb">
+            <ol itemscope itemtype="http://schema.org/BreadcrumbList">
+                <li itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem">
+                    <a itemprop="item" href="../../../index.html"><span itemprop="name">Home</span></a>
+                    <meta itemprop="position" content="1">
+                </li>
+                <li itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem">
+                    <a itemprop="item" href="../../index.html"><span itemprop="name">Docs</span></a>
+                    <meta itemprop="position" content="2">
+                </li>
+                <li itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem">
+                    <a itemprop="item" href="../../index.html#internal"><span itemprop="name">内部仕様</span></a>
+                    <meta itemprop="position" content="3">
+                </li>
+                <li itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem">
+                    <a itemprop="item" href="./index.html"><span itemprop="name">デバイスイベント</span></a>
+                    <meta itemprop="position" content="4">
+                </li>
+            </ol>
+        </div>
+        <div id="content">
+            <div>
+                <h1>デバイスイベントモジュール</h1>
+                <p>デバイスイベントモジュールは下記機能を持つ。</p>
+                <ol>
+                    <li><a href="#init">初期化</a><ol>
+                        <li><a href="#init-open">デバイスファイルオープン</a></li></ol></li>
+                    <li><a href="#start">制御開始</a><ol>
+                        <li><a href="#start-initfds">読込み監視FDリスト初期化</a></li>
+                        <li><a href="#start-setfds">読込み監視FDリスト設定</a></li>
+                        <li><a href="#start-select">デバイスファイル監視</a></li>
+                        <li><a href="#start-do">イベント発行</a></li></ol></li>
+                </ol>
+            </div>
+            <div class="totop"><a href="#top">▲上へ</a></div>
+            <div>
+                <h1><a name="init">初期化</a></h1>
+                <p>初期化時にデバイスファイルオープンを行う。シーケンスを以下に示す。</p>
+                <br>
+                <div class="center">
+                    シーケンス<br>
+                    <img src="init.png">
+                </div>
+                <br>
+                <h2><a name="init-open">デバイスファイルオープン</a></h2>
+                <p>シリアルポート1とシリアルポート2のデバイスファイルをopenし、ファイルディスクリプタ(FD)を保存しておく。詳細は<a href="../../external/devopen/index.html">外部仕様(デバイスファイルopen機能)</a>のデバイスファイルopenを参照のこと。</p>
+                <br>
+            </div>
+            <div class="totop"><a href="#top">▲上へ</a></div>
+            <div>
+                <h1><a name="start">制御開始</a></h1>
+                <p>デバイスファイルを監視し、デバイスが読書き可能になった時にデバイス制御の読み込み機能を起動する。シーケンスを以下に示す。</p>
+                <br>
+                <div class="center">
+                    シーケンス<br>
+                    <img src="start.png">
+                </div>
+                <br>
+                <br>
+                <h2><a name="start-initfds">読込み監視FDリスト初期化</a></h2>
+                <p>C標準ライブラリのmemset()を用いて読込み管理FDリストを初期化する。設定パラメータを以下に示す。</p>
+                <br>
+                <div class="center">memset()設定パラメータ</div>
+                <table>
+                    <tr>
+                        <td class="title">#</td>
+                        <td class="title">引数名</td>
+                        <td class="title">設定値</td>
+                    </tr>
+                    <tr>
+                        <td class="title">1</td>
+                        <td class="center">*s</td>
+                        <td class="center">(読込み監視FDリストポインタ)</td>
+                    </tr>
+                    <tr>
+                        <td class="title">2</td>
+                        <td class="center">c</td>
+                        <td class="center">0</td>
+                    </tr>
+                    <tr>
+                        <td class="title">3</td>
+                        <td class="center">n</td>
+                        <td class="center">sizeof ( LibMvfsFds_t )</td>
+                    </tr>
+                </table>
+                <br>
+                <br>
+                <h2><a name="start-setfds">読込み監視FDリスト設定</a></h2>
+                <p>mvfsライブラリのLIBMVFS_FDS_SET()マクロを使用してFDリストへデバイスファイルopen時に取得したFDを設定する。設定パラメータを以下に示す。</p>
+                <br>
+                <div class="center">LIBMVFS_FDS_FDS_SET()設定パラメータ</div>
+                <table>
+                    <tr>
+                        <td class="title" rowspan="2">#</td>
+                        <td class="title" rowspan="2">引数名</td>
+                        <td class="title" colspan="2">設定値</td>
+                    </tr>
+                    <tr>
+                        <td class="title">シリアルポート1</td>
+                        <td class="title">シリアルポート2</td>
+                    </tr>
+                    <tr>
+                        <td class="title">1</td>
+                        <td class="center">_PFDS</td>
+                        <td class="center" colspan="2">(読込み監視FDリストポインタ)</td>
+                    </tr>
+                    <tr>
+                        <td class="title">2</td>
+                        <td class="center">_FD</td>
+                        <td>シリアルポート1のFD</td>
+                        <td>シリアルポート2のFD</td>
+                    </tr>
+                </table>
+                <br>
+                <br>
+                <h2><a name="start-select">デバイスファイル監視</a></h2>
+                <p>デバイスファイルの読込み監視を開始する。詳細は<a href="../../external/devread/index.html">外部仕様(デバイスファイルread機能)</a>の読み込み待ち合わせを参照のこと。</p>
+                <br><br>
+                <h2><a name="start-do">イベント発行</a></h2>
+                <p>デバイスファイル監視を行うmvfsライブラリのLibMvfsSelect()から制御が戻った時、各FDリストにFDが設定されているかmvfsライブラリのLIBMVFS_FDS_CHECK()マクロを用いて判定し、設定されていたFDに対応するデバイス制御の処理を呼び出す。設定パラメータを以下に示す。</p>
+                <br>
+                <div class="center">LIBMVFS_FDS_CHECK()設定パラメータ</div>
+                <table>
+                    <tr>
+                        <td class="title" rowspan="2">#</td>
+                        <td class="title" rowspan="2">引数名</td>
+                        <td class="title" colspan="2">設定値</td>
+                    </tr>
+                    <tr>
+                        <td class="title">シリアルポート1判定時</td>
+                        <td class="title">シリアルポート2判定時</td>
+                    </tr>
+                    <tr>
+                        <td class="title">1</td>
+                        <td class="center">_PFDS</td>
+                        <td class="center" colspan="2">(変数ポインタ)</td>
+                    </tr>
+                    <tr>
+                        <td class="title">2</td>
+                        <td class="center">_FD</td>
+                        <td class="center">シリアルポート1のFD</td>
+                        <td class="center">シリアルポート2のFD</td>
+                    </tr>
+                </table>
+                <br>
+                <div class="center">判定優先度と対応関数</div>
+                <table>
+                    <tr><td class="title">優先度</td><td class="title">ファイルディスクリプタ</td><td class="title">処理</tr>
+                    <tr><td class="title">1</td><td class="center">シリアルポート1</td><td rowspan="2">デバイス制御モジュールの読込み機能</td></tr>
+                    <tr><td class="title">2</td><td class="center">シリアルポート2</td></tr>
+                </table>
+            </div>
+            <div class="totop"><a href="#top">▲上へ</a></div>
+        </div>
+        <div id="footer">
+            <div id="copyright">
+                Copyright &copy 2020 Mochi. All rights reserved.
+            </div>
+        </div>
+    </body>
+</html>

@@ -1,42 +1,47 @@
 @startuml
 
-participant kernel
+participant "Mochi\nKernel" as kernel
 box "mtty"
-    participant "メイン"           as main
-    participant "バッファ管理"     as buffer
-    participant "デバイスイベント" as devt
-    participant "セッション管理"   as sess
-    participant "ユーザイベント"   as uevt
+    participant "メイン"             as main
+    participant "バッファ\n管理"     as bufmng
+    participant "デバイス\nイベント" as devt
+    participant "ターミナル\n制御"   as tctrl
+    participant "セッション\n管理"   as sessmng
+    participant "ユーザ\nイベント"   as uevt
 end box
 
 kernel -> main: main
 activate main
 
-group 初期化
-    main -> buffer: BufferInit()
-    activate buffer
-    ref over buffer: 初期化
-    main <-- buffer:
-    deactivate buffer
+main -> bufmng: 初期化
+activate bufmng
+ref over bufmng: 初期化
+main <-- bufmng:
+deactivate bufmng
 
-    main -> devt: DevtInit()
-    activate devt
-    ref over devt: 初期化
-    main <-- devt:
-    deactivate devt
+main -> devt: 初期化
+activate devt
+ref over devt: 初期化
+main <-- devt:
+deactivate devt
 
-    main -> sess: SessInit()
-    activate sess
-    ref over sess: 初期化
-    main <-- sess:
-    deactivate sess
+main -> tctrl: 初期化
+activate tctrl
+ref over tctrl: 初期化
+main <-- tctrl:
+deactivate tctrl
 
-    main -> uevt: UevtInit()
-    activate uevt
-    ref over uevt: 初期化
-    main <-- uevt:
-    deactivate uevt
-end group
+main -> sessmng: 初期化
+activate sessmng
+ref over sessmng: 初期化
+main <-- sessmng:
+deactivate sessmng
+
+main -> uevt: 初期化
+activate uevt
+ref over uevt: 初期化
+main <-- uevt:
+deactivate uevt
 
 ref over main: 制御開始
 

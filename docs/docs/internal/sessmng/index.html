@@ -1,0 +1,303 @@
+<!doctype html>
+<html lang="ja">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge"><!-- IE互換モード回避 -->
+        <meta name="author" content="Mochi">
+        <meta name="viewport" content="width=device-width,initial-scale=1"><!-- レスポンシブデザイン -->
+        <meta name="description" content="mttyは、MochiKernel上で動作するttyサーバです。">
+        <meta name="format-detection" content="email=no,telephone=no,address=no">
+        <meta property="og:url" content="https://MasterMochi.github.io/mtty/">
+        <meta property="og:title" content="MLib">
+        <meta property="og:type" content="website">
+        <meta property="og:description" content="mttyは、MochiKernel上で動作するttyサーバです。">
+        <!-- <meta property="og:image" content=""> -->
+        <meta name="twitter:card" content="summary_large_image">
+        <meta name="twitter:site" content="@master_mochi">
+        <!-- <meta name="msapplication-TileImage" content="" --><!-- MSWIN8～ピン留め対応 -->
+        <meta name="msapplication-TitleColor" content="#424242"><!-- MSWIN8～ピン留め対応 -->
+        <link rel="stylesheet" href="../../../style.css">
+        <link rel="canonical" href="https://MasterMochi.github.io/mtty/">
+        <link href="https://fonts.googleapis.com/css?family=Cutive+Mono" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css?family=Sawarabi+Mincho" rel="stylesheet">
+        <link href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" rel="stylesheet" integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU" crossorigin="anonymous">
+        <title>mtty - 内部仕様 - セッション管理</title>
+    </head>
+    <body>
+        <a name="top"></a>
+        <div id="header">
+            <div id="menu">
+                <a href="../../../index.html"><div id="logo">mtty</div></a>
+                <a href="../../index.html"><div>Docs</div></a>
+            </div>
+        </div>
+        <div id="crumb">
+            <ol itemscope itemtype="http://schema.org/BreadcrumbList">
+                <li itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem">
+                    <a itemprop="item" href="../../../index.html"><span itemprop="name">Home</span></a>
+                    <meta itemprop="position" content="1">
+                </li>
+                <li itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem">
+                    <a itemprop="item" href="../../index.html"><span itemprop="name">Docs</span></a>
+                    <meta itemprop="position" content="2">
+                </li>
+                <li itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem">
+                    <a itemprop="item" href="../../index.html#internal"><span itemprop="name">内部仕様</span></a>
+                    <meta itemprop="position" content="3">
+                </li>
+                <li itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem">
+                    <a itemprop="item" href="./index.html"><span itemprop="name">セッション管理</span></a>
+                    <meta itemprop="position" content="4">
+                </li>
+            </ol>
+        </div>
+        <div id="content">
+            <div>
+                <h1>セッション管理モジュール</h1>
+                <p>セッション管理モジュールは下記機能を持つ。</p>
+                <ol>
+                    <li><a href="#init">初期化</a><ol>
+                        <li><a href="#init-list">セッション管理初期化</a></li></ol></li>
+                    <li><a href="#connect">セッション接続</a><ol>
+                        <li><a href="#connect-check">ターミナルファイルパスチェック</a></li>
+                        <li><a href="#connect-malloc">セッション情報割当て</a></li>
+                        <li><a href="#connect-set">セッション情報設定</a></li>
+                        <li><a href="#connect-add">セッション情報登録</a></li>
+                        <li><a href="#connect-resp">ターミナルファイルopen応答<a></li></ol></li>
+                    <li><a href="#disconnect">セッション切断</a><ol>
+                        <li><a href="#disconnect-del">セッション情報削除</a></li>
+                        <li><a href="#disconnect-free">セッション情報解放</a></li>
+                        <li><a href="#disconnect-resp">ターミナルファイルclose応答</a></li></ol></li>
+                    <li><a href="#fd2id">デバイスID変換</a><ol>
+                        <li><a href="#fd2id-get">セッション情報取得</a></li></ol></li>
+                </ol>
+            </div>
+            <div class="totop"><a href="#top">▲上へ</a></div>
+            <div>
+                <h1><a name="init">初期化</a></h1>
+                <p>mtty起動時に、セッション情報を初期化する。シーケンスを以下に示す。</p>
+                <br>
+                <div class="center">
+                    シーケンス<br>
+                    <img src="init.png">
+                </div>
+                <br>
+                <br>
+                <h2><a name="init-list">セッション管理初期化</a></h2>
+                <p>セッション情報はリンクリストを用いて管理する。リンクリストの初期化は、MLibライブラリのMLibListInit()を用いて行う。設定パラメータを以下に示す。</p>
+                <br>
+                <div class="center">MLibListInit()設定パラメータ</div>
+                <table>
+                    <tr>
+                        <td class="title">#</td>
+                        <td class="title">引数名</td>
+                        <td class="title">設定値</td>
+                    </tr>
+                    <tr>
+                        <td class="title">1</td>
+                        <td class="center">*pList</td>
+                        <td class="center">(リストハンドルポインタ)</td>
+                    </tr>
+                </table>
+            </div>
+            <div class="totop"><a href="#top">▲上へ</a></div>
+            <div>
+                <h1><a name="connect">セッション接続</a></h1>
+                <p>ターミナルファイルopen要求時にセッション接続として、セッション情報を生成し管理リストに追加し、応答する。シーケンスを以下に示す。</p>
+                <br>
+                <div class="center">
+                    シーケンス<br>
+                    <img src="connect.png">
+                </div>
+                <br>
+                <br>
+                <h2><a name="connect-check">ターミナルファイルパスチェック</a></h2>
+                <p>ターミナルファイルopen要求のファイルパスがmttyで管理するターミナルファイルか判定する。ターミナルファイルでない場合はターミナルファイルopen応答を失敗で送信し処理を中断する。</p>
+                <br>
+                <div class="center">ターミナルファイルパス一覧</div>
+                <table>
+                    <tr>
+                        <td class="title">#</td>
+                        <td class="title">パス</td>
+                        <td class="title">説明</td>
+                    </tr>
+                    <tr>
+                        <td class="title">1</td>
+                        <td>/ttyS1</td>
+                        <td>シリアルポート1</td>
+                    </tr>
+                    <tr>
+                        <td class="title">2</td>
+                        <td>/ttyS2</td>
+                        <td>シリアルポート2</td>
+                    </tr>
+                </table>
+                <br>
+                <br>
+                <h2><a name="connect-malloc">セッション情報割当て</a></h2>
+                <p>セッション情報をC標準ライブラリのmalloc()を用いて割り当てる。設定パラメータを以下に示す。</p>
+                <br>
+                <div class="center">malloc()設定パラメータ</div>
+                <table>
+                    <tr>
+                        <td class="title">#</td>
+                        <td class="title">引数名</td>
+                        <td class="title">設定値</td>
+                    </tr>
+                    <tr>
+                        <td class="title">1</td>
+                        <td class="center">size</td>
+                        <td>(セッション情報サイズ)</td>
+                    </tr>
+                </table>
+                <br>
+                <br>
+                <h2><a name="connect-set">セッション情報設定</a></h2>
+                <p><a href="../../external/ttyopen/index.html">ターミナルファイルopen要求</a>のセッション情報作成を参照のこと。</p>
+                <br>
+                <br>
+                <h2><a name="connect-add">セッション情報登録</a></h2>
+                <p>MLibライブラリのMLibListInsertHead()を用いて、セッション情報を管理リストに登録する。設定パラメータを以下に示す。</p>
+                <br>
+                <div class="center">MLibListInsertHead()設定パラメータ</div>
+                <table>
+                    <tr>
+                        <td class="title">#</td>
+                        <td class="title">引数名</td>
+                        <td class="title">設定値</td>
+                    </tr>
+                    <tr>
+                        <td class="title">1</td>
+                        <td class="center">*pList</td>
+                        <td class="center">(セッション情報管理リストへのポインタ)</td>
+                    </tr>
+                    <tr>
+                        <td class="title">2</td>
+                        <td class="center">*pNewNode</td>
+                        <td class="center">(作成したセッション情報へのポインタ)</td>
+                    </tr>
+                </table>
+                <br>
+                <br>
+                <h2><a name="connect-resp">ターミナルファイルopen応答</a></h2>
+                <p><a href="../../external/ttyopen/index.html">外部仕様(ターミナルファイルopen要求処理機能)</a>のターミナルファイルopen応答を参照のこと。</p>
+                <br>
+                <br>
+            </div>
+            <div class="totop"><a href="#top">▲上へ</a></div>
+            <div>
+                <h1><a name="disconnect">セッション切断</a></h1>
+                <p>ターミナルファイルclose要求時にセッション切断として、セッション情報を管理リストから削除し、VfsClose応答を送信する。シーケンスを以下に示す。</p>
+                <br>
+                <div class="center">
+                    シーケンス<br>
+                    <img src="disconnect.png">
+                </div>
+                <br>
+                <br>
+                <h2><a name="disconnect-del">セッション情報削除</a></h2>
+                <p>MLibライブラリのMLibListSearchHead()を用いて、管理リストからグローバルファイルディスクリプタに該当するセッション情報を検索し、削除する。設定パラメータを以下に示す。</p>
+                <br>
+                <div class="center">MLibListSearchHead()設定パラメータ</div>
+                <table>
+                    <tr>
+                        <td class="title">#</td>
+                        <td class="title">引数名</td>
+                        <td class="title">設定値</td>
+                    </tr>
+                    <tr>
+                        <td class="title">1</td>
+                        <td class="center">*pList</td>
+                        <td class="center">(セッション管理リストへのポインタ)</td>
+                    </tr>
+                    <tr>
+                        <td class="title">2</td>
+                        <td class="center">pCallback</td>
+                        <td class="center">(検索比較関数ポインタ)</td>
+                    </tr>
+                    <tr>
+                        <td class="title">3</td>
+                        <td class="center">*pParam</td>
+                        <td>(グローバルFD格納先ポインタ)</td>
+                    </tr>
+                    <tr>
+                        <td class="title">4</td>
+                        <td class="center">method</td>
+                        <td class="center">MLIB_LIST_REMOVE</td>
+                    </tr>
+                </table>
+                <br>
+                <h2><a name="disconnect-free">セッション情報解放</a></h2>
+                <p>C標準ライブラリのfree()を用いて、グローバルディスクリプタに対応するセッション情報を解放する。設定パラメータを以下に示す。</p>
+                <br>
+                <div class="center">free()設定パラメータ</div>
+                <table>
+                    <tr>
+                        <td class="title">#</td>
+                        <td class="title">引数名</td>
+                        <td class="title">設定値</td>
+                    </tr>
+                    <tr>
+                        <td class="title">1</td>
+                        <td class="center">*ptr</td>
+                        <td class="center">(セッション情報格納先ポインタ)</td>
+                    </tr>
+                </table>
+                <br>
+                <br>
+                <h2><a name="disconnect-repl">ターミナルファイルclose応答</a></h2>
+                <p>ターミナルファイルclose応答は、mvfsライブラリのLibMvfsSendVfsCloseResp()を用いる。詳細は<a href="../../external/ttyclose/index.html">ターミナルファイルclose応答</a>のターミナルファイルclose応答を参照のこと。</p>
+                <br>
+            </div>
+            <div class="totop"><a href="#top">▲上へ</a></div>
+            <div>
+                <h1><a name="fd2id">デバイスID変換</a></h1>
+                <p>セッション情報からオープンされているターミナルファイルのグローバルFDをデバイスIDに変換する。シーケンスを以下に示す。</p>
+                <br>
+                <div class="center">
+                    シーケンス<br>
+                    <img src="fd2id.png">
+                </div>
+                <br>
+                <br>
+                <h2><a name="fd2id-get">セッション情報取得</a></h2>
+                <p>MLibライブラリのMLibListSearchHead()を用いて、グローバルFDに該当するセッション情報を取得する。設定パラメータを以下に示す。</p>
+                <br>
+                <div class="center">MLibListSearchHead()設定パラメータ</div>
+                <table>
+                    <tr>
+                        <td class="title">#</td>
+                        <td class="title">引数名</td>
+                        <td class="title">設定値</td>
+                    </tr>
+                    <tr>
+                        <td class="title">1</td>
+                        <td class="center">*pList</td>
+                        <td class="center">(セッション管理リストへのポインタ)</td>
+                    </tr>
+                    <tr>
+                        <td class="title">2</td>
+                        <td class="center">pCallback</td>
+                        <td class="center">(検索比較関数ポインタ)</td>
+                    </tr>
+                    <tr>
+                        <td class="title">3</td>
+                        <td class="center">*pParam</td>
+                        <td>(グローバルFD格納先ポインタ)</td>
+                    </tr>
+                    <tr>
+                        <td class="title">4</td>
+                        <td class="center">method</td>
+                        <td class="center">MLIB_LIST_GET</td>
+                    </tr>
+                </table>
+            </div>
+            <div class="totop"><a href="#top">▲上へ</a></div>
+        </div>
+        <div id="footer">
+            <div id="copyright">
+                Copyright &copy 2020 Mochi. All rights reserved.
+            </div>
+        </div>
+    </body>
+</html>

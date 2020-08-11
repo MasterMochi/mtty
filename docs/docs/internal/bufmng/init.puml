@@ -1,0 +1,29 @@
+@startuml
+
+box "mtty"
+    participant "メイン"         as main
+    participant "バッファ\n管理" as bufmng
+end box
+participant "MLib" as mlib
+
+activate main
+ref over main: 初期化
+
+main -> bufmng: 初期化
+activate bufmng
+
+bufmng -> mlib: 読込み用バッファ初期化( /serial1 )
+activate mlib
+bufmng <-- mlib:
+deactivate mlib
+
+bufmng -> mlib: 読込み用バッファ初期化( /serial2 )
+activate mlib
+bufmng <-- mlib:
+deactivate mlib
+
+main <-- bufmng:
+deactivate bufmng
+
+@enduml
+

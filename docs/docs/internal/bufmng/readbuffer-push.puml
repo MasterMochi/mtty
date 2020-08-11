@@ -1,0 +1,32 @@
+@startuml
+
+box "mtty"
+    participant "デバイス\n制御" as dctrl
+    participant "バッファ\n管理" as bufmng
+end box
+participant "MLib" as mlib
+
+activate dctrl
+ref over dctrl: デバイスファイルread
+
+dctrl -> bufmng: 読込み用バッファ追加( デバイスID, データ, サイズ )
+activate bufmng
+
+bufmng -> bufmng: デバイスIDハンドル変換
+
+loop サイズ分
+    bufmng -> mlib: データ追加( ハンドル, データ )
+    activate mlib
+    bufmng <-- mlib:
+    deactivate mlib
+
+    break 失敗
+        dctrl <-- bufmng:
+    end break
+end loop
+
+dctrl <-- bufmng:
+deactivate bufmng
+
+@enduml
+

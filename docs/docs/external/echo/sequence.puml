@@ -1,0 +1,16 @@
+@startuml
+
+participant mvfs
+participant mtty
+
+activate mtty
+
+ref over mtty: デバイスファイルread機能
+
+loop 1byte毎
+    mtty -> mtty: 制御コード文字変換
+
+    ref over mvfs, mtty: デバイスファイルwrite機能
+end loop
+
+@enduml

@@ -1,0 +1,43 @@
+@startuml
+
+participant "mvfs\nライブラリ" as libmvfs
+box "mtty"
+    participant "セッション管理"   as sess
+    participant "ユーザ\nイベント" as uevt
+end box
+participant "MLib" as mlib
+
+activate libmvfs
+ref over libmvfs, uevt
+    ターミナルファイル操作要求待ち合わせ
+end ref
+
+libmvfs -> sess: ターミナルファイルclose要求( fd )
+activate sess
+
+sess -> mlib: セッション情報削除( fd )
+activate mlib
+sess <-- mlib:
+deactivate mlib
+
+alt セッション情報有り
+    sess -> sess: セッション情報解放
+    libmvfs <- sess: ターミナルファイルclose応答( fd, 成功 )
+    activate libmvfs
+    libmvfs --> sess:
+    deactivate libmvfs
+
+else セッション情報無し
+    libmvfs <- sess: ターミナルファイルclose応答( fd, 失敗 )
+    activate libmvfs
+    libmvfs --> sess:
+    deactivate libmvfs
+
+end alt
+
+libmvfs <-- sess:
+deactivate sess
+
+@enduml
+
+

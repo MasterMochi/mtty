@@ -1,25 +1,22 @@
 @startuml
 
-participant kernel
 box "mtty"
-    participant main
-    participant devt as "デバイスイベント"
+    participant "メイン"             as main
+    participant "デバイス\nイベント" as devt
 end box
 
-kernel -> main: 起動
 activate main
-
 ref over main: 初期化
 
-group 制御開始
-    main -> devt: DevtStart()
-    activate devt
+main -> devt: 制御開始
+activate devt
 
-    ref over devt: 制御開始
+ref over devt
+    制御開始
+end ref
 
-    main <-- devt:
-    deactivate devt
-end group
+main <-- devt:
+deactivate devt
 
 @enduml
 

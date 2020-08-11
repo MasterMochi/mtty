@@ -1,7 +1,7 @@
 /******************************************************************************/
 /*                                                                            */
 /* src/mtty/main.c                                                            */
-/*                                                                 2020/05/04 */
+/*                                                                 2020/08/11 */
 /* Copyright (C) 2018-2020 Mochi.                                             */
 /*                                                                            */
 /******************************************************************************/
@@ -15,10 +15,11 @@
 #include <libmk.h>
 
 /* モジュール内ヘッダ */
-#include "Buffer.h"
+#include "Bufmng.h"
 #include "Debug.h"
 #include "Devt.h"
-#include "Sess.h"
+#include "Sessmng.h"
+#include "Tctrl.h"
 #include "Uevt.h"
 
 
@@ -67,13 +68,16 @@ void main( void )
 static void Init( void )
 {
     /* バッファ管理初期化 */
-    BufferInit();
+    BufmngInit();
 
     /* デバイスイベント初期化 */
     DevtInit();
 
+    /* ターミナル制御初期化 */
+    TctrlInit();
+
     /* セッション管理初期化 */
-    SessInit();
+    SessmngInit();
 
     /* ユーザイベント初期化 */
     UevtInit();

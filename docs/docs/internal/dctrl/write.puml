@@ -1,36 +1,26 @@
 @startuml
 
-participant drv as "drv_ns16550"
-
+participant "mvfs\nライブラリ" as libmvfs
 box "mtty"
-    participant devt as "デバイスイベント"
-    participant dctrl as "デバイス制御"
-    participant buffer as "バッファ管理"
+    participant "デバイス\n制御"   as dctrl
+    participant "ターミナル\n制御" as tctrl
 end box
 
-activate devt
+activate tctrl
+ref over tctrl: ターミナルファイルwrite
 
-ref over devt: イベント発行
-
-devt -> dctrl: DctrlDoWrite( デバイスID, fd )
+dctrl <- tctrl: 書込み( デバイスID, fd )
 activate dctrl
 
-dctrl -> buffer: BufferPopForWrite( デバイスID )
-activate buffer
-
-ref over buffer: 書込み用バッファ管理
-
-dctrl <-- buffer:
-deactivate buffer
 
 opt 書込みサイズ != 0
-    drv <<- dctrl: LibMvfsWrite( fd, ... )
-    activate drv
-    drv --> dctrl:
-    deactivate drv
+    libmvfs <- dctrl: デバイスファイル書込み( fd, データ, 書込みサイズ )
+    activate libmvfs
+    libmvfs --> dctrl:
+    deactivate libmvfs
 end opt
 
-devt <-- dctrl:
+dctrl --> tctrl:
 deactivate dctrl
 ||20||
 

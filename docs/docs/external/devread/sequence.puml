@@ -1,0 +1,54 @@
+@startuml
+
+participant mvfs
+participant mtty
+
+activate mtty
+
+loop
+    mvfs <<- mtty: 読込待ち合わせ
+    activate mvfs
+    ...
+    mvfs ->> mtty:
+    deactivate mvfs
+
+    opt /serial1読込み可能
+        mvfs <<- mtty: デバイスファイルread( /serial1 )
+        activate mvfs
+        mvfs ->> mtty:
+        deactivate mvfs
+
+        mtty -> mtty: バッファ追加
+
+        opt 読込みレディ未通知
+            mvfs <<- mtty: デバイスファイルready通知( /ttyS1, 読込みレディ )
+            activate mvfs
+            mvfs ->> mtty:
+            deactivate mvfs
+        end opt
+
+        ref over mtty: エコー機能
+    end opt
+
+    opt /serial2読込み可能
+        mvfs <<- mtty: デバイスファイルread( /serial2 )
+        activate mvfs
+        mvfs ->> mtty:
+        deactivate mvfs
+
+        mtty -> mtty: バッファ追加
+
+        opt 読込みレディ未通知
+            mvfs <<- mtty: デバイスファイルready通知( /ttyS2, 読込みレディ )
+            activate mvfs
+            mvfs ->> mtty:
+            deactivate mvfs
+        end opt
+
+        ref over mtty: エコー機能
+    end opt
+
+end loop
+deactivate mtty
+
+@enduml

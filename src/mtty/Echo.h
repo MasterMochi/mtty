@@ -23,7 +23,7 @@
 /******************************************************************************/
 /* エコー */
 extern void EchoDo( uint32_t    fd,
-                    MttyDevId_t id,
+                    MttyDevID_t id,
                     char        *pData,
                     size_t      size    );
 

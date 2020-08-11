@@ -1,0 +1,48 @@
+@startuml
+
+participant "mvfs\nライブラリ" as libmvfs
+box "mtty"
+    participant "デバイス制御"   as dctrl
+    participant "ターミナル制御" as tctrl
+end box
+participant "MLib" as mlib
+
+activate dctrl
+ref over dctrl
+    デバイスファイルread
+end ref
+
+dctrl -> tctrl: 読込みレディ( デバイス識別ID )
+activate tctrl
+
+tctrl -> mlib: スピンロック
+activate mlib
+tctrl <-- mlib:
+deactivate mlib
+
+alt デバイス識別ID == シリアルポート1 &&\n /ttyS1読込みレディ未通知
+    libmvfs <- tctrl: レディ状態通知( "/ttyS1" )
+    activate libmvfs
+    libmvfs --> tctrl:
+    deactivate libmvfs
+
+    tctrl -> tctrl: 読込みレディ通知状態更新
+
+else デバイス式罰ID == シリアルポート2 &&\n /ttyS2読込みレディ未通知
+    libmvfs <- tctrl: レディ状態通知( "/ttyS2" )
+    activate libmvfs
+    libmvfs --> tctrl:
+    deactivate libmvfs
+
+    tctrl -> tctrl: 読込みレディ通知状態更新
+end alt
+
+tctrl -> mlib: スピンアンロック
+activate mlib
+tctrl <-- mlib:
+deactivate mlib
+
+dctrl <-- tctrl:
+deactivate tctrl
+
+@enduml

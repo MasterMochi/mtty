@@ -1,0 +1,33 @@
+@startuml
+
+participant mvfs
+participant mtty
+
+activate mvfs
+ref over mvfs, mtty: ターミナルファイル操作要求待ち合わせ機能
+
+mvfs ->> mtty: ターミナルファイルread要求
+deactivate mvfs
+activate mtty
+
+mtty -> mtty: 読込みバッファ取り出し
+
+alt 取出しサイズ == 要求サイズ
+    mvfs <<- mtty: デバイスファイルread応答( 成功, 読込みレディ )
+    activate mvfs
+    mvfs ->> mtty
+    deactivate mvfs
+else 取出しサイズ != 0
+    mvfs <<- mtty: デバイスファイルread応答( 成功 )
+    activate mvfs
+    mvfs ->> mtty
+    deactivate mvfs
+else 取出しサイズ == 0
+    mvfs <<- mtty: デバイスファイルread応答( 失敗 )
+    activate mvfs
+    mvfs ->> mtty
+    deactivate mvfs
+    deactivate mtty
+end alt
+
+@enduml

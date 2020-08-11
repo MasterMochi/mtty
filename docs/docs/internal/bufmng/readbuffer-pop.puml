@@ -1,0 +1,32 @@
+@startuml
+
+box "mtctrl"
+    participant "バッファ\n管理" as bufmng
+    participant "ターミナル制御" as tctrl
+end box
+participant "MLib" as mlib
+
+activate tctrl
+ref over tctrl: ターミナルファイルread
+
+bufmng <- tctrl: 読込み用バッファ取出( デバイスID, サイズ )
+activate bufmng
+
+bufmng -> bufmng: デバイスIDハンドル変換
+
+loop サイズ分
+    bufmng -> mlib: データ追加( ハンドル, データ )
+    activate mlib
+    bufmng <-- mlib:
+    deactivate mlib
+
+    break 失敗
+        bufmng --> tctrl:
+    end break
+end loop
+
+bufmng --> tctrl:
+deactivate bufmng
+
+@enduml
+

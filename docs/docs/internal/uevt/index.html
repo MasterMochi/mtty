@@ -1,0 +1,266 @@
+<!doctype html>
+<html lang="ja">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge"><!-- IE互換モード回避 -->
+        <meta name="author" content="Mochi">
+        <meta name="viewport" content="width=device-width,initial-scale=1"><!-- レスポンシブデザイン -->
+        <meta name="description" content="mttyは、MochiKernel上で動作するttyサーバです。">
+        <meta name="format-detection" content="email=no,telephone=no,address=no">
+        <meta property="og:url" content="https://MasterMochi.github.io/mtty/">
+        <meta property="og:title" content="MLib">
+        <meta property="og:type" content="website">
+        <meta property="og:description" content="mttyは、MochiKernel上で動作するttyサーバです。">
+        <!-- <meta property="og:image" content=""> -->
+        <meta name="twitter:card" content="summary_large_image">
+        <meta name="twitter:site" content="@master_mochi">
+        <!-- <meta name="msapplication-TileImage" content="" --><!-- MSWIN8～ピン留め対応 -->
+        <meta name="msapplication-TitleColor" content="#424242"><!-- MSWIN8～ピン留め対応 -->
+        <link rel="stylesheet" href="../../../style.css">
+        <link rel="canonical" href="https://MasterMochi.github.io/mtty/">
+        <link href="https://fonts.googleapis.com/css?family=Cutive+Mono" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css?family=Sawarabi+Mincho" rel="stylesheet">
+        <link href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" rel="stylesheet" integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU" crossorigin="anonymous">
+        <title>mtty - 内部仕様 - ユーザイベント</title>
+    </head>
+    <body>
+        <a name="top"></a>
+        <div id="header">
+            <div id="menu">
+                <a href="../../../index.html"><div id="logo">mtty</div></a>
+                <a href="../../index.html"><div>Docs</div></a>
+            </div>
+        </div>
+        <div id="crumb">
+            <ol itemscope itemtype="http://schema.org/BreadcrumbList">
+                <li itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem">
+                    <a itemprop="item" href="../../../index.html"><span itemprop="name">Home</span></a>
+                    <meta itemprop="position" content="1">
+                </li>
+                <li itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem">
+                    <a itemprop="item" href="../../index.html"><span itemprop="name">Docs</span></a>
+                    <meta itemprop="position" content="2">
+                </li>
+                <li itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem">
+                    <a itemprop="item" href="../../index.html#internal"><span itemprop="name">内部仕様</span></a>
+                    <meta itemprop="position" content="3">
+                </li>
+                <li itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem">
+                    <a itemprop="item" href="./index.html"><span itemprop="name">ユーザイベント</span></a>
+                    <meta itemprop="position" content="4">
+                </li>
+            </ol>
+        </div>
+        <div id="content">
+            <div>
+                <h1>ユーザイベントモジュール</h1>
+                <p>ユーザイベントモジュールは下記機能を持つ。
+                <ol>
+                    <li><a href="#init">初期化</a><ol>
+                        <li><a href="#init-stack">スタック領域作成</a></li>
+                        <li><a href="#init-thread">スレッド作成</a></li>
+                        <li><a href="#init-tty">ターミナルファイル作成</a></li></ol></li>
+                    <li><a href="#wait">ターミナルファイル操作要求待ち合わせ</a><ol>
+                        <li><a href="#wait-wait">ターミナルファイル操作要求待ち合わせ</a></li></ol></li>
+                </ol>
+            </div>
+            <div>
+                <h1><a name="init">初期化</a></h1>
+                <p>mtty起動時に、スレッドを作成し作成したスレッド上でターミナルファイルの作成を行う。シーケンスを以下に示す。</p>
+                <br>
+                <div class="center">
+                    シーケンス<br>
+                    <img src="init.png">
+                </div>
+                <br>
+                <br>
+                <h2><a name="init-thread">スタック領域作成</a></h2>
+                <p>ターミナルファイル制御用スレッドのスタック領域をC標準ライブラリのmalloc()を用いて割当て、memset()を用いて初期化する。設定パラメータを以下に示す。</p>
+                <br>
+                <div class="center">malloc()設定パラメータ</div>
+                <table>
+                    <tr>
+                        <td class="title">#</td>
+                        <td class="title">引数名</td>
+                        <td class="title">設定値</td>
+                    </tr>
+                    <tr>
+                        <td class="title">1</td>
+                        <td class="center">size</td>
+                        <td class="center">8,192</td>
+                    </tr>
+                </table>
+                <br>
+                <div class="center">memset()設定パラメータ</div>
+                <table>
+                    <tr>
+                        <td class="title">#</td>
+                        <td class="title">引数名</td>
+                        <td class="title">設定値</td>
+                    </tr>
+                    <tr>
+                        <td class="title">1</td>
+                        <td class="center">*s</td>
+                        <td class="center">(スタック領域ポインタ)</td>
+                    </tr>
+                    <tr>
+                        <td class="title">2</td>
+                        <td class="center">c</td>
+                        <td class="center">0</td>
+                    </tr>
+                    <tr>
+                        <td class="title">3</td>
+                        <td class="center">n</td>
+                        <td class="center">8,192</td>
+                    </tr>
+                </table>
+                <br>
+                <br>
+                <h2><a name="init-thread">スレッド作成</a></h2>
+                <p>MochiKernelライブラリのLibMkThreadCreate()を用いて、ターミナルファイル制御用のスレッドを作成する。設定パラメータを以下に示す。</p>
+                <br>
+                <div class="center">LibMkThreadCreate()設定パラメータ</div>
+                <table>
+                    <tr>
+                        <td class="title">#</td>
+                        <td class="title">引数名</td>
+                        <td class="title">設定値</td>
+                    </tr>
+                    <tr>
+                        <td class="title">1</td>
+                        <td class="center">pFunc</td>
+                        <td class="center">(スレッドエントリ関数ポインタ)</td>
+                    </tr>
+                    <tr>
+                        <td class="title">2</td>
+                        <td class="center">*pArg</td>
+                        <td class="center">NULL</td>
+                    </tr>
+                    <tr>
+                        <td class="title">3</td>
+                        <td class="center">*pStackAddr</td>
+                        <td class="center">(スタック領域ポインタ)</td>
+                    </tr>
+                    <tr>
+                        <td class="title">4</td>
+                        <td class="center">stackSize</td>
+                        <td class="center">8,192</td>
+                    </tr>
+                    <tr>
+                        <td class="title">5</td>
+                        <td class="center">*pTaskId</td>
+                        <td class="center">(タスクID格納先ポインタ)</td>
+                    </tr>
+                    <tr>
+                        <td class="title">6</td>
+                        <td class="center">*pErr</td>
+                        <td class="center">(エラー要因格納先ポインタ)</td>
+                    </tr>
+                </table>
+                <br>
+                <br>
+                <h2><a name="init-tty">ターミナルファイル作成</a></h2>
+                <p>mttyライブラリのLibMvfsMount()を用いてターミナルファイルを作成する。設定パラメータを以下に示す。</p>
+                <br>
+                <div class="center">LibMvfsMount()設定パラメータ</div>
+                <table>
+                    <tr>
+                        <td class="title" rowspan="2">#</td>
+                        <td class="title" rowspan="2">引数名</td>
+                        <td class="title" colspan="2">設定値</td>
+                    </tr>
+                    <tr>
+                        <td class="title">シリアルポート1</td>
+                        <td class="title">シリアルポート2</td>
+                    </tr>
+                    <tr>
+                        <td class="title">1</td>
+                        <td class="center">*pPath</td>
+                        <td class="center">"/ttyS1"</td>
+                        <td class="center">"/ttyS2"</td>
+                    </tr>
+                    <tr>
+                        <td class="title">2</td>
+                        <td class="center">*pErrNo</td>
+                        <td class="center" colspan="2">(エラー要因格納先ポインタ)</td>
+                    </tr>
+                </table>
+                <br>
+            </div>
+            <div class="totop"><a href="#top">▲上へ</a></div>
+            <div>
+                <h1><a name="wait">ターミナルファイル操作要求待ち合わせ</a></h1>
+                <p>初期化を行った後にターミナルファイル操作要求の待ち合わせを行う。シーケンスを下記に示す。</p>
+                <br>
+                <div class="center">
+                    シーケンス<br>
+                    <img src="sched.png">
+                </div>
+                <br>
+                <br>
+                <h2><a name="wait-wait">ターミナルファイル操作要求待ち合わせ</a></h2>
+                <p>待ち合わせは、mvfsライブラリのLibMvfsSchedStart()を用いる。設定パラメータを以下に示す。</p>
+                <br>
+                <div class="center">LibMvfsSchedStart()設定パラメータ</div>
+                <table>
+                    <tr>
+                        <td class="title">#</td>
+                        <td class="title">引数名</td>
+                        <td class="title">設定値</td>
+                    </tr>
+                    <tr>
+                        <td class="title">1</td>
+                        <td class="center">*pInfo</td>
+                        <td class="center">(スケジュール情報ポインタ)</td>
+                    </tr>
+                    <tr>
+                        <td class="title">2</td>
+                        <td class="center">*pErrNo</td>
+                        <td class="center">(エラー要因格納先ポインタ)</td>
+                    </tr>
+                </table>
+                <br>
+                <div class="center">スケジュール情報</div>
+                <table>
+                    <tr>
+                        <td class="title">#</td>
+                        <td class="title">設定</td>
+                        <td class="title">設定値</td>
+                    </tr>
+                    <tr>
+                        <td class="title">1</td>
+                        <td class="title">callBack.pVfsOpen</td>
+                        <td class="center">(open要求処理関数ポインタ)</td>
+                    </tr>
+                    <tr>
+                        <td class="title">2</td>
+                        <td class="title">callBack.pVfsWrite</td>
+                        <td class="center">(write要求処理関数ポインタ)</td>
+                    </tr>
+                    <tr>
+                        <td class="title">3</td>
+                        <td class="title">callBack.pVfsRead</td>
+                        <td class="center">(read要求処理関数ポインタ)</td>
+                    </tr>
+                    <tr>
+                        <td class="title">4</td>
+                        <td class="title">callBack.pVfsClose</td>
+                        <td class="center">(close要求処理関数ポインタ)</td>
+                    </tr>
+                    <tr>
+                        <td class="title">5</td>
+                        <td class="title">callBack.pOther</td>
+                        <td>NULL</td>
+                    </tr>
+                </table>
+                <br>
+            </div>
+            <div class="totop"><a href="#top">▲上へ</a></div>
+        </div>
+        <div id="footer">
+            <div id="copyright">
+                Copyright &copy 2020 Mochi. All rights reserved.
+            </div>
+        </div>
+    </body>
+</html>

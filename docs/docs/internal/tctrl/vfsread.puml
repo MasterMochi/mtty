@@ -1,0 +1,86 @@
+@startuml
+
+participant "mvfs\nライブラリ" as libmvfs
+box "mtty"
+    participant "バッファ\n管理"   as bufmng
+    participant "ターミナル\n制御" as tctrl
+    participant "セッション\n管理" as sessmng
+    participant "ユーザ\nイベント" as uevt
+end box
+participant "MLib" as mlib
+
+activate libmvfs
+ref over libmvfs, uevt
+    ターミナルファイル操作要求待ち合わせ
+end ref
+
+libmvfs -> tctrl: ターミナルファイルread要求\n    ( fd, サイズ )
+activate tctrl
+
+tctrl -> sessmng: デバイスID変換( fd )
+activate sessmng
+ref over sessmng: デバイスID変換
+tctrl <-- sessmng:
+deactivate sessmng
+
+break 無効デバイスID(未open)
+    libmvfs <- tctrl: ターミナルファイルread応答\n    ( fd, 失敗 )
+    activate libmvfs
+    libmvfs --> tctrl:
+    deactivate libmvfs
+end opt
+
+tctrl -> mlib: スピンロック
+activate mlib
+tctrl <-- mlib:
+deactivate mlib
+
+group 排他制御
+    tctrl -> tctrl: 応答用バッファ領域確保\n    ( サイズ )
+
+    break 確保失敗
+        libmvfs <- tctrl: ターミナルファイルread応答\n    ( fd, 失敗 )
+        activate libmvfs
+        libmvfs --> tctrl:
+        deactivate libmvfs
+    end opt
+
+    bufmng <- tctrl: バッファ取出し\n    ( デバイスID, サイズ )
+    activate bufmng
+    ref over bufmng : バッファ取り出し
+    bufmng --> tctrl:
+    deactivate bufmng
+
+    alt 取出しサイズ == サイズ
+        libmvfs <- tctrl: ターミナルファイルread応答\n    ( fd, 成功, 読込みレディ )
+        activate libmvfs
+        libmvfs --> tctrl:
+        deactivate libmvfs
+
+    else 取出しサイズ > 0
+        libmvfs <- tctrl: ターミナルファイルread応答\n    ( fd, 成功 )
+        activate libmvfs
+        libmvfs --> tctrl:
+        deactivate libmvfs
+
+    else 取出しサイズ == 0
+        libmvfs <- tctrl: ターミナルファイルread応答\n    ( fd, 失敗 )
+        activate libmvfs
+        libmvfs --> tctrl:
+        deactivate libmvfs
+
+    end alt
+
+    tctrl -> tctrl: 応答用バッファ領域解放
+end group
+
+tctrl -> tctrl: 読込みレディ状態更新
+tctrl -> mlib: スピンアンロック
+activate mlib
+tctrl <-- mlib:
+deactivate mlib
+
+libmvfs <-- tctrl:
+deactivate tctrl
+
+@enduml

@@ -1,46 +1,49 @@
 @startuml
 
-participant drv as "drv_ns16550"
-
+participant "mvfs\nライブラリ" as libmvfs
 box "mtty"
-    participant "デバイスイベント" as devt
-    participant "デバイス制御"     as dctrl
-    participant "エコー"           as echo
-    participant "バッファ管理"     as buffer
+    participant "デバイス\nイベント" as devt
+    participant "デバイス\n制御"     as dctrl
+    participant "エコー"             as echo
+    participant "ターミナル\n制御"   as tctrl
+    participant "バッファ\n管理"     as bufmng
 end box
 
 activate devt
-
 ref over devt: イベント発行
 
-devt -> dctrl: DctrlDoRead( デバイスID, fd )
+devt -> dctrl: 読込み( デバイスID, fd )
 activate dctrl
 
 loop
-    drv <<- dctrl: LibMvfsRead( fd, ... )
-    activate drv
-    drv -->> dctrl:
-    deactivate drv
+    libmvfs <- dctrl: デバイスファイルread( fd )
+    activate libmvfs
+    libmvfs --> dctrl:
+    deactivate libmvfs
 
-    break 読込サイズ==0
+    break 読込サイズ == 0
         devt <-- dctrl:
     end
 
-    dctrl -> echo: EchoDo( fd, ... )
+    dctrl -> bufmng: バッファ追加\n    ( デバイスID, データ, 読込みサイズ )
+    activate bufmng
+    ref over bufmng
+        バッファ追加
+    end ref
+    dctrl <-- bufmng:
+    deactivate bufmng
+
+    dctrl -> tctrl: 読込みレディ( デバイスID )
+    activate tctrl
+    ref over tctrl: 読込みレディ通知
+    dctrl <-- tctrl:
+    deactivate tctrl
+
+    dctrl -> echo: エコー( fd )
     activate echo
     ref over echo: エコー
     dctrl <-- echo:
     deactivate echo
-
-    dctrl -> buffer: BufferPushForRead( デバイスID, ... )
-    activate buffer
-
-    ref over buffer
-        読込み用バッファ管理
-    end ref
-
-    dctrl <-- buffer:
-    deactivate buffer
 end
 
 devt <-- dctrl:

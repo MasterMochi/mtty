@@ -1,0 +1,20 @@
+@startuml
+
+participant mvfs
+participant mtty
+
+activate mtty
+
+loop
+    mtty -> mtty: ターミナルファイル操作要求待ち合わせ
+    ...
+
+    ref over mtty
+        ターミナルファイルopen要求処理機能
+        ターミナルファイルread要求処理機能
+        ターミナルファイルwrite要求処理機能
+        ターミナルファイルclose要求処理機能
+    end ref
+end loop
+
+@enduml

@@ -1,0 +1,51 @@
+@startuml
+
+participant "mvfs\nライブラリ" as libmvfs
+box "mtty"
+    participant "デバイス\n制御"   as dctrl
+    participant "ターミナル\n制御" as tctrl
+    participant "セッション\n管理" as sessmng
+    participant "ユーザ\nイベント" as uevt
+end box
+
+activate libmvfs
+ref over libmvfs, uevt
+    ターミナルファイル操作要求待ち合わせ
+end ref
+
+libmvfs -> tctrl: ターミナルファイルwrite要求( fd, サイズ )
+activate tctrl
+
+tctrl -> sessmng: デバイスID変換( fd )
+activate sessmng
+ref over sessmng: デバイスID変換
+tctrl <-- sessmng:
+deactivate sessmng
+
+break 無効デバイスID(未open)
+    libmvfs <- tctrl: ターミナルファイルwrite応答( fd, 失敗 )
+    activate libmvfs
+    libmvfs --> tctrl:
+    deactivate libmvfs
+    libmvfs <-- tctrl
+end break
+
+dctrl <- tctrl: デバイスファイルwrite\n    ( デバイスID, サイズ )
+activate dctrl
+ref over dctrl: デバイスファイルwrite
+dctrl --> tctrl:
+deactivate dctrl
+
+alt 書込みサイズ == サイズ
+    libmvfs <-- tctrl: ターミナルファイルwrite応答( fd, 成功, レディ )
+else 書込みサイズ > 0
+    libmvfs <-- tctrl: ターミナルファイルwrite応答( fd, 成功 )
+else 書込みサイズ == 0
+    libmvfs <-- tctrl: ターミナルファイルwrite応答( fd, 失敗 )
+end alt
+
+libmvfs <-- tctrl:
+deactivate tctrl
+
+@enduml
+

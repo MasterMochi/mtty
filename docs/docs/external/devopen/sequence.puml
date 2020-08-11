@@ -1,0 +1,18 @@
+@startuml
+
+participant mvfs
+participant mtty
+
+activate mtty
+
+mvfs <<- mtty: デバイスファイルopen( "/serial1" )
+activate mvfs
+mvfs ->> mtty:
+deactivate mvfs
+
+mvfs <<- mtty: デバイスファイルopen( "/serial2" )
+activate mvfs
+mvfs ->> mtty:
+deactivate mvfs
+
+@enduml

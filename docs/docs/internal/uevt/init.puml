@@ -2,23 +2,28 @@
 
 box "mtty"
     participant main
-    participant uevt_main as "uevt\n(デバイス制御スレッド)"
-    participant uevt_tty  as "uevt\n(tty制御スレッド)"
+    participant uevt_main as "uevt\n(デバイスイベント\nスレッド)"
+    participant uevt_user as "uevt\n(ユーザイベント\nスレッド)"
 end box
+participant "MochiKernel\nライブラリ" as libmk
+participant "mvfs\nライブラリ"        as libmvfs
 
 activate main
-
 ref over main: 初期化
 
-main -> uevt_main: UevtInit()
+main -> uevt_main: 初期化()
 activate uevt_main
 
 group スレッド作成
-    uevt_main -> uevt_main: malloc()
+    uevt_main -> uevt_main: スタック領域作成
 
-    create uevt_tty
-    uevt_main -> uevt_tty: LibMkThreadCreate()
-    activate uevt_tty
+    uevt_main -> libmk: スレッド作成
+    activate libmk
+    create uevt_user
+    uevt_user <<- libmk:
+    activate uevt_user
+    uevt_main <-- libmk:
+    deactivate libmk
 end
 
 main <-- uevt_main:
@@ -26,11 +31,16 @@ deactivate uevt_main
 
 
 
-group ttyファイル作成
-    uevt_tty -> uevt_tty: LibMvfsMount( "/ttyS1" )
-    uevt_tty -> uevt_tty: LibMvfsMount( "/ttyS2" )
-end
+uevt_user -> libmvfs: ターミナルファイル作成( "/ttyS1" )
+activate libmvfs
+uevt_user <-- libmvfs:
+deactivate libmvfs
 
-ref over uevt_tty: スケジューリング
+uevt_user -> libmvfs: ターミナルファイル作成( "/ttyS2" )
+activate libmvfs
+uevt_user <-- libmvfs:
+deactivate libmvfs
+
+ref over main, uevt_user: ターミナルファイル操作要求待ち合わせ
 
 @enduml

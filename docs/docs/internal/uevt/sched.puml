@@ -1,17 +1,28 @@
 @startuml
 
 box "mtty"
-    participant uevt as "ユーザイベント"
+    participant "ユーザイベント" as uevt
 end box
+participant "mvfs\nライブラリ" as libmvfs
 
 activate uevt
-
 ref over uevt: 初期化
 
 uevt -> uevt: スケジュール情報設定
 
-uevt -> uevt: LibMvfsSchedStart()
-deactivate uevt
-
+loop
+    uevt -> libmvfs: ターミナルファイル操作要求待ち合わせ
+    activate libmvfs
+    ref over uevt,libmvfs
+        　 セッション管理
+        セッション接続/切断
+    end ref
+    ref over uevt, libmvfs
+        　　　 ターミナル制御
+        ターミナルファイル読込/書込
+    end ref
+    uevt <-- libmvfs:
+    deactivate libmvfs
+end loop
 
 @enduml

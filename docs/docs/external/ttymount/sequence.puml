@@ -1,0 +1,22 @@
+@startuml
+
+participant mvfs
+participant mtty
+
+activate mtty
+
+mvfs <<- mtty: ターミナルファイル作成( "/ttyS1" )
+activate mvfs
+mvfs ->> mtty:
+deactivate mvfs
+
+mvfs <<- mtty: ターミナルファイル作成( "/ttyS2" )
+activate mvfs
+mvfs ->> mtty:
+deactivate mvfs
+
+ref over mtty
+    ターミナルファイル操作要求待ち合わせ
+end ref
+
+@enduml

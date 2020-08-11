@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="ja">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge"><!-- IE互換モード回避 -->
+        <meta name="author" content="Mochi">
+        <meta name="viewport" content="width=device-width,initial-scale=1"><!-- レスポンシブデザイン -->
+        <meta name="description" content="mttyは、MochiKernel上で動作するttyサーバです。">
+        <meta name="format-detection" content="email=no,telephone=no,address=no">
+        <meta property="og:url" content="https://MasterMochi.github.io/mtty/">
+        <meta property="og:title" content="MLib">
+        <meta property="og:type" content="website">
+        <meta property="og:description" content="mttyは、MochiKernel上で動作するttyサーバです。">
+        <!-- <meta property="og:image" content=""> -->
+        <meta name="twitter:card" content="summary_large_image">
+        <meta name="twitter:site" content="@master_mochi">
+        <!-- <meta name="msapplication-TileImage" content="" --><!-- MSWIN8～ピン留め対応 -->
+        <meta name="msapplication-TitleColor" content="#424242"><!-- MSWIN8～ピン留め対応 -->
+        <link rel="stylesheet" href="../../../style.css">
+        <link rel="canonical" href="https://MasterMochi.github.io/mtty/">
+        <link href="https://fonts.googleapis.com/css?family=Cutive+Mono" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css?family=Sawarabi+Mincho" rel="stylesheet">
+        <link href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" rel="stylesheet" integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU" crossorigin="anonymous">
+        <title>mtty - 外部仕様 - デバイスファイルread機能</title>
+    </head>
+    <body>
+        <a name="top"></a>
+        <div id="header">
+            <div id="menu">
+                <a href="../../../index.html"><div id="logo">mtty</div></a>
+                <a href="../../index.html"><div>Docs</div></a>
+            </div>
+        </div>
+        <div id="crumb">
+            <ol itemscope itemtype="http://schema.org/BreadcrumbList">
+                <li itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem">
+                    <a itemprop="item" href="../../../index.html"><span itemprop="name">Home</span></a>
+                    <meta itemprop="position" content="1">
+                </li>
+                <li itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem">
+                    <a itemprop="item" href="../../index.html"><span itemprop="name">Docs</span></a>
+                    <meta itemprop="position" content="2">
+                </li>
+                <li itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem">
+                    <a itemprop="item" href="../../index.html#external"><span itemprop="name">外部仕様</span></a>
+                    <meta itemprop="position" content="3">
+                </li>
+                <li itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem">
+                    <a itemprop="item" href="./index.html"><span itemprop="name">デバイスファイルread機能</span></a>
+                    <meta itemprop="position" content="4">
+                </li>
+            </ol>
+        </div>
+        <div id="content">
+            <div>
+                <h1>デバイスファイルread機能</h1>
+                <p>open済のすべてのデバイスファイルの読込み待ち合わせを行い、読込み可能な場合はデバイスファイルから読み込み、mtty内バッファへの格納してエコー機能を実行する。シーケンスを下記に示す。</p>
+                <br>
+                <div class="center">
+                    シーケンス<br>
+                    <img src="sequence.png">
+                </div>
+            </div>
+            <div class="totop"><a href="#top">▲上へ</a></div>
+            <div>
+                <h1>読込み待ち合わせ</h1>
+                <p>読込み待ち合わせはmvfsライブラリのLibMvfsSelect()を用いる。待ち合わせるデバイスファイルと設定パラメータを以下に示す。</p>
+                <br>
+                <div class="center">待ち合わせ対象デバイスファイル</div>
+                <table>
+                    <tr>
+                        <td class="title">#</td>
+                        <td class="title">デバイスファイル</td>
+                    </tr>
+                    <tr>
+                        <td class="title">1</td>
+                        <td class="center">/serial1</td>
+                    </tr>
+                    <tr>
+                        <td class="title">2</td>
+                        <td class="center">/serial2</td>
+                    </tr>
+                </table>
+                <br>
+                <div class="center">LibMvfsSelect()設定パラメータ</div>
+                <table>
+                    <tr>
+                        <td class="title">#</td>
+                        <td class="title">引数名</td>
+                        <td class="title">設定値</td>
+                    </tr>
+                    <tr>
+                        <td class="title">1</td>
+                        <td class="center">*pReadFds</td>
+                        <td class="center">読込監視FDリストポインタ</td>
+                    </tr>
+                    <tr>
+                        <td class="title">2</td>
+                        <td class="center">*pWriteFds</td>
+                        <td class="center">NULL</td>
+                    </tr>
+                    <tr>
+                        <td class="title">3</td>
+                        <td class="center">timeout</td>
+                        <td class="center">0</td>
+                    </tr>
+                    <tr>
+                        <td class="title">4</td>
+                        <td class="center">*pErr</td>
+                        <td class="center">エラー要因格納先ポインタ</td>
+                    </tr>
+                </table>
+            </div>
+            <div class="totop"><a href="#top">▲上へ</a></div>
+            <div>
+                <h1>デバイスファイルread</h1>
+                <p>デバイスファイルreadはmvfsライブラリのLibMvfsRead()を用いる。設定パラメータを以下に示す。</p>
+                <br>
+                <div class="center">LibMvfsRead()設定パラメータ</div>
+                <table>
+                    <tr>
+                        <td class="title" rowspan="2">#</td>
+                        <td class="title" rowspan="2">引数名</td>
+                        <td class="title" colspan="2">設定値</td>
+                    </tr>
+                    <tr>
+                        <td class="title">/serial1</td>
+                        <td class="title">/serial2</td>
+                    </tr>
+                    <tr>
+                        <td class="title">1</td>
+                        <td class="center">fd</td>
+                        <td class="center">シリアルポート1のFD</td>
+                        <td class="center">シリアルポート2のFD</td>
+                    </tr>
+                    <tr>
+                        <td class="title">2</td>
+                        <td class="center">*pBuffer</td>
+                        <td class="center" colspan="2">(読込みデータ格納先ポインタ)</td>
+                    </tr>
+                    <tr>
+                        <td class="title">3</td>
+                        <td class="center">bufferSize</td>
+                        <td class="center" colspan="2">512</td>
+                    </tr>
+                    <tr>
+                        <td class="title">4</td>
+                        <td class="center">*pReadSize</td>
+                        <td class="center" colspan="2">(読み込んだデータサイズ格納先ポインタ)</td>
+                    </tr>
+                    <tr>
+                        <td class="title">5</td>
+                        <td class="center">*pErrNo</td>
+                        <td class="center" colspan="2">(エラー要因格納先ポインタ)</td>
+                    </tr>
+                </table>
+
+            </div>
+            <div class="totop"><a href="#top">▲上へ</a></div>
+            <div>
+                <h1>バッファ追加</h1>
+                <p>ターミナルファイルread要求時にデータを渡すために、デバイスファイルから読み込んだデータは、デバイスファイル毎の内部バッファにデータを追加しておく。</p>
+            </div>
+            <div class="totop"><a href="#top">▲上へ</a></div>
+        </div>
+        <div id="footer">
+            <div id="copyright">
+                Copyright &copy 2020 Mochi. All rights reserved.
+            </div>
+        </div>
+    </body>
+</html>

@@ -1,7 +1,7 @@
 /******************************************************************************/
 /*                                                                            */
 /* src/mtty/Uevt.c                                                            */
-/*                                                                 2020/05/09 */
+/*                                                                 2020/08/11 */
 /* Copyright (C) 2020 Mochi.                                                  */
 /*                                                                            */
 /******************************************************************************/
@@ -17,18 +17,12 @@
 #include <libmvfs.h>
 
 /* 共通ヘッダ */
+#include "config.h"
 #include "mtty.h"
 #include "Debug.h"
-#include "Sess.h"
-#include "Tty.h"
+#include "Sessmng.h"
+#include "Tctrl.h"
 #include "Uevt.h"
-
-
-/******************************************************************************/
-/* 定義                                                                       */
-/******************************************************************************/
-/* スタックサイズ */
-#define STACK_SIZE ( 8192 )
 
 
 /******************************************************************************/
@@ -42,7 +36,7 @@ static void SchedThread( void *pArg );
 /* 静的グローバル変数定義                                                     */
 /******************************************************************************/
 /* スレッドタスクID */
-static MkTaskId_t gTaskId;
+static MkTaskId_t gTaskID;
 
 
 /******************************************************************************/
@@ -66,17 +60,17 @@ void UevtInit( void )
     retMk  = MK_RET_FAILURE;
 
     /* スタック領域割り当て */
-    pStack = malloc( STACK_SIZE );
+    pStack = malloc( CONFIG_SIZE_STACK );
 
     /* スタック領域初期化 */
-    memset( pStack, 0, STACK_SIZE );
+    memset( pStack, 0, CONFIG_SIZE_STACK );
 
     /* スレッド生成 */
     retMk = LibMkThreadCreate( &SchedThread,     /* スレッド関数     */
                                NULL,             /* スレッド関数引数 */
                                pStack,           /* スタック         */
-                               STACK_SIZE,       /* スタックサイズ   */
-                               &gTaskId,         /* タスクID         */
+                               CONFIG_SIZE_STACK,/* スタックサイズ   */
+                               &gTaskID,         /* タスクID         */
                                &errMk        );  /* エラー要因       */
 
     /* 生成結果判定 */
@@ -145,10 +139,10 @@ static void SchedThread( void *pArg )
     }
 
     /* スケジュール情報設定 */
-    schedInfo.callBack.pVfsClose = &SessDoVfsClose;
-    schedInfo.callBack.pVfsOpen  = &SessDoVfsOpen;
-    schedInfo.callBack.pVfsRead  = &TtyDoVfsRead;
-    schedInfo.callBack.pVfsWrite = &TtyDoVfsWrite;
+    schedInfo.callBack.pVfsClose = &SessmngDoVfsClose;
+    schedInfo.callBack.pVfsOpen  = &SessmngDoVfsOpen;
+    schedInfo.callBack.pVfsRead  = &TctrlDoVfsRead;
+    schedInfo.callBack.pVfsWrite = &TctrlDoVfsWrite;
     schedInfo.callBack.pOther    = NULL;
 
     /* スケジュール開始 */

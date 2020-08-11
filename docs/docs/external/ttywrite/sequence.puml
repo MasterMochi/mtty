@@ -1,0 +1,35 @@
+@startuml
+
+participant mvfs
+participant mtty
+
+activate mvfs
+ref over mvfs, mtty: ターミナルファイル操作要求待ち合わせ機能
+
+mvfs ->> mtty: ターミナルファイルwrite要求
+deactivate mvfs
+activate mtty
+
+ref over mtty
+    デバイスファイルwrite機能
+end ref
+
+alt 書込みサイズ == 要求サイズ
+    mvfs <<- mtty: ターミナルファイルwrite応答( 成功, 書込みレディ )
+    activate mvfs
+    mvfs ->> mtty:
+    deactivate mvfs
+else 書込みサイズ != 0
+    mvfs <<- mtty: ターミナルファイルwrite応答( 成功 )
+    activate mvfs
+    mvfs ->> mtty:
+    deactivate mvfs
+else 書込みサイズ == 0
+    mvfs <<- mtty: ターミナルファイルwrite応答( 失敗 )
+    activate mvfs
+    mvfs ->> mtty:
+    deactivate mvfs
+    deactivate mtty
+end alt
+
+@enduml
