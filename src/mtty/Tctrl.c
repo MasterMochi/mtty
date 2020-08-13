@@ -132,12 +132,12 @@ void TctrlDoVfsWrite( uint32_t globalFD,
                       void     *pBuffer,
                       size_t   size      )
 {
-    size_t      pushSize;   /* バッファ追加サイズ */
-    MttyDevID_t id;         /* デバイスID         */
+    size_t      writeSize;  /* 書込みサイズ */
+    MttyDevID_t id;         /* デバイスID   */
 
     /* 初期化 */
-    pushSize = 0;
-    id       = MTTY_DEVID_NULL;
+    writeSize = 0;
+    id        = MTTY_DEVID_NULL;
 
     /* デバイスID変換 */
     id = SessmngConvertToDevID( globalFD );
@@ -158,17 +158,17 @@ void TctrlDoVfsWrite( uint32_t globalFD,
     }
 
     /* デバイスファイル書込み */
-    size = DctrlWrite( id, pBuffer, size );
+    writeSize = DctrlWrite( id, pBuffer, size );
 
     /* 追加サイズ判定 */
-    if ( pushSize == size ) {
+    if ( writeSize == size ) {
         /* 書込みサイズと一致 */
 
         /* VfsWrite応答(成功) */
         SendVfsWriteResp( globalFD,
                           LIBMVFS_RET_SUCCESS,
                           MVFS_READY_WRITE,
-                          pushSize             );
+                          writeSize            );
 
     } else {
         /* 書込みサイズと不一致 */
@@ -177,7 +177,7 @@ void TctrlDoVfsWrite( uint32_t globalFD,
         SendVfsWriteResp( globalFD,
                           LIBMVFS_RET_SUCCESS,
                           MVFS_READY_WRITE,
-                          pushSize             );
+                          writeSize            );
     }
 
     return;
