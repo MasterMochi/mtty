@@ -1,7 +1,7 @@
 /******************************************************************************/
 /*                                                                            */
 /* src/mtty/Echo.c                                                            */
-/*                                                                 2020/05/24 */
+/*                                                                 2020/08/24 */
 /* Copyright (C) 2020 Mochi.                                                  */
 /*                                                                            */
 /******************************************************************************/
@@ -66,6 +66,9 @@ void EchoDo( uint32_t    fd,
     idx        = 0;
     errLibMvfs = LIBMVFS_ERR_NONE;
     retLibMvfs = LIBMVFS_RET_FAILURE;
+
+    /* [TODO] msh用にecho機能抑止。ioctl実装によるechoON/OFFできるまで */
+    return;
 
     /* 1バイト毎にサイズ分繰り返す */
     for ( idx = 0; idx < size; idx++ ) {
